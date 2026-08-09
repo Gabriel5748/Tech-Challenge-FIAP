@@ -1,13 +1,19 @@
+import type associarCargaProdutoInput = require("../dtos/associarCargaProdutoInput");
+import type cadastrarProdutoQuimicoInput = require("../dtos/cadastrarProdutoQuimicoInput");
+import type { InformarClassificacaoRiscoInput } from "../dtos/informarClassificacaoRiscoInput.js";
+import type registrarCargaQuimicaInput = require("../dtos/registrarCargaQuimicaInput");
+import type registrarDocumentacaoInput = require("../dtos/registrarDocumentacaoInput");
+
 export interface CadastrarProdutoQuimico {
-    executar(input: CadastrarProdutoQuimicoInput): Promise<void>;
+    executar(input: cadastrarProdutoQuimicoInput.CadastrarProdutoQuimicoInput): Promise<void>;
 };
 
 export interface RegistrarCargaQuimica {
-    executar(input: RegistrarCargaQuimicaInput): Promise<void>;
+    executar(input: registrarCargaQuimicaInput.RegistrarCargaQuimicaInput): Promise<void>;
 };
 
 export interface AssociarCargaProduto {
-    executar(input: AssociarCargaProdutoInput): Promise<void>;
+    executar(input: associarCargaProdutoInput.AssociarCargaProdutoInput): Promise<void>;
 };
 
 export interface InformarClassificacaoRisco {
@@ -15,7 +21,7 @@ export interface InformarClassificacaoRisco {
 };
 
 export interface RegistrarDocumentacao {
-    executar(input: RegistrarDocumentacaoInput): Promise<void>;
+    executar(input: registrarDocumentacaoInput.RegistrarDocumentacaoInput): Promise<void>;
 };
 
 export interface DefinirResponsavelTecnico {

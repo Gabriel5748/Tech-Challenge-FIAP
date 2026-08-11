@@ -1,9 +1,15 @@
 export class Permissao {
-    name: string;
+    id: number;
+    nome: string;
     descricao: string;
 
-    constructor(name: string,descricao: string) {
-        this.name = name;
+    constructor(id: number, nome: string, descricao: string) {
+        if (!nome?.trim()) {
+            throw new Error("Uma permissão não pode ser cadastrada sem nome.");
+        }
+
+        this.id = id;
+        this.nome = nome;
         this.descricao = descricao;
-    };
-};
+    }
+}

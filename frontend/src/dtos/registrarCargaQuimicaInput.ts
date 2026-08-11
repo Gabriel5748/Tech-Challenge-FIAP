@@ -1,5 +1,11 @@
+import type { ClasseRisco } from "../entities/enums.js";
+
 export interface RegistrarCargaQuimicaInput {
-    nome_carga: string,
-    quantidade: number,
-    data_registro: Date,
+    produtoQuimicoId: number;
+    quantidade: number;
+    unidadeMedida: string;
+    classeRisco: ClasseRisco;
+    responsavelTecnicoId: number;
+    areaArmazenamentoId: number;
+    dataRegistro: Date;
 }

@@ -1,6 +1,6 @@
 import type { Permissao } from "./permission.js";
 
-export class Group {
+export class Grupo {
     id: number;
     nome: string;
     descricao: string;

@@ -1,7 +1,7 @@
 import type { CargaQuimica } from "../entities/cargaQuimica.js";
 import type { ProdutoQuimico } from "../entities/produtoQuimico.js";
 import type { User } from "../entities/user.js";
-import type { Group } from "../entities/group.js";
+import type { Grupo } from "../entities/group.js";
 import type { AreaArmazenamento } from "../entities/areaArmazenamento.js";
 
 export interface CargaQuimicaRepository {
@@ -23,8 +23,8 @@ export interface UsuarioRepository {
 }
 
 export interface GrupoRepository {
-    salvar(grupo: Group): Promise<void>;
-    buscarPorId(grupoId: number): Promise<Group | null>;
+    salvar(grupo: Grupo): Promise<void>;
+    buscarPorId(grupoId: number): Promise<Grupo | null>;
 }
 
 export interface AreaArmazenamentoRepository {

@@ -1,0 +1,20 @@
+import { IExemploRepository } from "../../../src/domain/interfaces/IexemploRepository";
+import { pool } from "../../database/database";
+
+export class ProdutoQuimicoRepository implements IExemploRepository {
+  async salvar(nome: string, formula: string) {
+    await pool.query(
+      `INSERT INTO produto_quimico (nome, formula)
+       VALUES ($1, $2)`,
+      [nome, formula],
+    );
+  }
+
+  async buscar(nome: string) {
+    const resultado = await pool.query(
+      `SELECT nome, formula FROM produto_quimico WHERE nome = $1`,
+      [nome],
+    );
+    return resultado.rows;
+  }
+}

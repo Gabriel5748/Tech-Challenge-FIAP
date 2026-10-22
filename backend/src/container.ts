@@ -1,14 +1,30 @@
-// import { BuscarExemplo } from "../application/use-cases/BuscarExemplo";
-// import { CadastrarExemplo } from "../application/use-cases/CadastrarExemplo";
-// import { ExemploRepository } from "../infrastructure/repositories/ExemploRepository";
-// import { ExemploController } from "../interfaces/http/controllers/exemploController";
+import { AtualizarStatusDaCarga } from "../application/use-cases/cargaQuimica/atualizarStatusDaCarga";
+import { BuscarCargaQuimicaPorIdentificador } from "../application/use-cases/cargaQuimica/buscarCargaQuimicaPorIdentificador";
+import { RegistrarCargaQuimica } from "../application/use-cases/cargaQuimica/registrarCargaQuimica";
+import { CargaQuimicaRepository } from "../infrastructure/repositories/cargaQuimica/cargaQuimicaRepository";
+import { AtualizarProdutoQuimico } from "../application/use-cases/produtoQuimico/atualizarProdutoQuimico";
+import { BuscarProdutoQuimicoPorIdentificador } from "../application/use-cases/produtoQuimico/buscarProdutoQuimicoPorIdentificador";
+import { CadastrarProdutoQuimico } from "../application/use-cases/produtoQuimico/cadastrarProdutoQuimico";
+import { InativarProdutoQuimico } from "../application/use-cases/produtoQuimico/inativarProdutoQuimico";
+import { ListarProdutosQuimicos } from "../application/use-cases/produtoQuimico/listarProdutoQuimico";
+import { ProdutoQuimicoRepository } from "../infrastructure/repositories/produtoQuimico/produtoQuimicoRepository";
+import { CargaQuimicaController } from "../interfaces/http/controllers/cargaQuimica/cargaQuimicaController";
+import { ProdutoQuimicoController } from "../interfaces/http/controllers/produtoQuimico/produtoQuimicoController";
 
-// const repository = new ExemploRepository();
+const cargaQuimicaRepository = new CargaQuimicaRepository();
 
-// const cadastrarExemplo = new CadastrarExemplo(repository);
-// const buscarExemplo = new BuscarExemplo(repository);
+export const cargaQuimicaController = new CargaQuimicaController(
+  new RegistrarCargaQuimica(cargaQuimicaRepository),
+  new BuscarCargaQuimicaPorIdentificador(cargaQuimicaRepository),
+  new AtualizarStatusDaCarga(cargaQuimicaRepository),
+);
 
-// export const exemploController = new ExemploController(
-//   cadastrarExemplo,
-//   buscarExemplo,
-// );
+const produtoQuimicoRepository = new ProdutoQuimicoRepository();
+
+export const produtoQuimicoController = new ProdutoQuimicoController(
+  new CadastrarProdutoQuimico(produtoQuimicoRepository),
+  new BuscarProdutoQuimicoPorIdentificador(produtoQuimicoRepository),
+  new ListarProdutosQuimicos(produtoQuimicoRepository),
+  new AtualizarProdutoQuimico(produtoQuimicoRepository),
+  new InativarProdutoQuimico(produtoQuimicoRepository),
+);

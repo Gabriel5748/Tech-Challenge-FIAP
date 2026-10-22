@@ -1,6 +1,8 @@
 import cors from "cors";
 import express from "express";
+import cargaQuimicaRoutes from "./interfaces/http/routes/cargaQuimica/cargaQuimicaRoute";
 import exemploRoutes from "./interfaces/http/routes/exemploRoutes";
+import produtoQuimicoRoutes from "./interfaces/http/routes/produtoQuimico/produtoQuimicoRoute";
 import { settings } from "./infrastructure/frameworks/settings";
 
 const app = express();
@@ -13,6 +15,8 @@ app.use(
 
 app.use(express.json());
 
+app.use("/api/cargas", cargaQuimicaRoutes);
+app.use("/api/produtos-quimicos", produtoQuimicoRoutes);
 
 app.get("/", (req, res) => {
   res.json({

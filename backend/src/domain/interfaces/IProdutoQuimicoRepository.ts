@@ -1,4 +1,7 @@
 export interface IProdutoQuimicoRepository {
-  salvar(nome: string, formula: string): Promise<void>;
-  buscar(nome: string): Promise<any[]>;
+  criar(nome: string, formula: string): Promise<void>;
+  buscarPorIdentificador(id: number): Promise<any[]>;
+  listar(): Promise<any[]>;
+  atualizar(formula: string, id: number): Promise<any[]>;
+  inativar(id: number): Promise<any[]>;
 }

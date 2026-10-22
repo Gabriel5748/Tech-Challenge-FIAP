@@ -26,9 +26,9 @@ export class CargaQuimicaRepository implements ICargaQuimicaRepository {
     return resultado.rows;
   }
 
-  async atualizarStatus(status: string, id: number) {
+  async atualizarStatus(id: number, status: string) {
     const resultado = await pool.query(
-      `update carga_quimica set status = $1 WHERE id = $2`,
+      `UPDATE carga_quimica SET status = $1 WHERE id = $2 RETURNING *`,
       [status, id],
     );
     return resultado.rows;

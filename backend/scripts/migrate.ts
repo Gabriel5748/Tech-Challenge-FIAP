@@ -1,5 +1,5 @@
-import sequelize from './domain/database'
-import './domain/entities/models';
+import sequelize from '../src/core/database'
+import'../src/core/models'
 
 async function runMigration() {
   try {

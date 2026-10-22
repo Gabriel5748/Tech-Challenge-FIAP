@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:up": "docker compose up -d",
-    "start": "tsx index.ts"
+    "start": "tsx server.ts"
   },
   "keywords": [],
   "author": "",

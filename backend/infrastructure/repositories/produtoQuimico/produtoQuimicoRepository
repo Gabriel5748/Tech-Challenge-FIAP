@@ -1,7 +1,7 @@
-import { IExemploRepository } from "../../../src/domain/interfaces/IexemploRepository";
+import { IProdutoQuimicoRepository } from "../../../src/domain/interfaces/IProdutoQuimicoRepository";
 import { pool } from "../../database/database";
 
-export class ProdutoQuimicoRepository implements IExemploRepository {
+export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
   async salvar(nome: string, formula: string) {
     await pool.query(
       `INSERT INTO produto_quimico (nome, formula)

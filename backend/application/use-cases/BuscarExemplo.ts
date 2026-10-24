@@ -1,14 +1,14 @@
-// import { ExemploRepository } from "../../infrastructure/repositories/ExemploRepository.ts";
+import { IExemploRepository } from "../../src/domain/interfaces/IExemploRepository";
 
-// export class BuscarExemplo {
-//   constructor(private repository: ExemploRepository) {}
-//   async execute(nome: string) {
-//     const nomeFormatado = nome.trim();
+export class BuscarExemplo {
+  constructor(private repository: IExemploRepository) {}
+  async execute(nome: string) {
+    const nomeFormatado = nome.trim();
 
-//     if (!nomeFormatado) {
-//       throw new Error("Nome obrigatório");
-//     }
+    if (!nomeFormatado) {
+      throw new Error("Nome obrigatório");
+    }
 
-//     return this.repository.buscar(nomeFormatado);
-//   }
-// }
+    return this.repository.buscar(nomeFormatado);
+  }
+}

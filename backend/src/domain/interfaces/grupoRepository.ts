@@ -1,4 +1,4 @@
-import { Grupos } from "../../../src/domain/entities/grupos";
+import { Grupos } from "../entities/grupos";
 
 export interface IGrupoRepository {
   salvar(grupo: Grupos): Promise<void>;

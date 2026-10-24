@@ -1,6 +1,6 @@
-import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository.ts";
+import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
 
-export class ListarCargasQuimicas {
+export class ListarCargaQuimica {
   constructor(private repository: ICargaQuimicaRepository) {}
   async execute() {
     return this.repository.listar();

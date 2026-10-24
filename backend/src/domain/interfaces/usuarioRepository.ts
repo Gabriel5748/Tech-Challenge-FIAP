@@ -1,4 +1,4 @@
-import { Usuario } from "../../../src/domain/entities/usuarios";
+import { Usuario } from "../entities/usuarios";
 
 export interface IUsuarioRepository {
   salvar(usuario: Usuario): Promise<void>;

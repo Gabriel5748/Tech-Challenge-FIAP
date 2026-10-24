@@ -1,5 +1,5 @@
-import sequelize from '../src/core/database'
-import'../src/core/models'
+import { sequelize } from '../infrastructure/frameworks/database';
+import '../src/core/models';
 
 async function runMigration() {
   try {
@@ -7,14 +7,15 @@ async function runMigration() {
     await sequelize.authenticate();
     console.log('Conexão estabelecida com sucesso.');
 
-    console.log('Gerando e sincronizando tabelas no banco de dados...');
+    console.log('Recomendado: utilize as migrações oficiais com "npm run db:migrate" (Sequelize CLI).');
+    console.log('Sincronizando tabelas via Sequelize como fallback seguro...');
 
     await sequelize.sync({ alter: true });
-    
-    console.log('Migração concluída com sucesso! Todas as tabelas do QuimiPort foram criadas/atualizadas.');
+
+    console.log('Tabelas verificadas e sincronizadas com sucesso!');
     process.exit(0);
   } catch (error) {
-    console.error('Erro durante a execução da migração:', error);
+    console.error('Erro durante a sincronização:', error);
     process.exit(1);
   }
 }

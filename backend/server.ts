@@ -1,9 +1,12 @@
 import cors from "cors";
 import express from "express";
-import cargaQuimicaRoutes from "./interfaces/http/routes/cargaQuimica/cargaQuimicaRoute";
-import exemploRoutes from "./interfaces/http/routes/exemploRoutes";
-import produtoQuimicoRoutes from "./interfaces/http/routes/produtoQuimico/produtoQuimicoRoute";
+import cargaQuimicaRouter from "./interfaces/http/routers/cargaQuimica/cargaQuimicaRoute";
+// import exemploRoutes from "./interfaces/http/routes/exemploRoutes";
+import produtoQuimicoRouter from "./interfaces/http/routers/produtoQuimico/produtoQuimicoRoute";
 import { settings } from "./infrastructure/frameworks/settings";
+
+// Routers
+import routerUser from "./interfaces/http/routers/users/users";
 
 const app = express();
 
@@ -13,10 +16,8 @@ app.use(
   }),
 );
 
+// Express Middleware
 app.use(express.json());
-
-app.use("/api/cargas", cargaQuimicaRoutes);
-app.use("/api/produtos-quimicos", produtoQuimicoRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -26,7 +27,11 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api", exemploRoutes);
+app.use("/api/usuarios", routerUser);
+app.use("/api/cargas", cargaQuimicaRouter);
+app.use("/api/produtos-quimicos", produtoQuimicoRouter);
+
+// app.use("/api", exemploRoutes);
 
 app.listen(settings.app.port, settings.app.host, () => {
   console.log(`Servidor rodando em http://${settings.app.host}:${settings.app.port}`);

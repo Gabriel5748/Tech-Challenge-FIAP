@@ -1,6 +1,5 @@
-import { IGrupoRepository } from "../../interfaces/http/repositories/grupoRepository";
-import { IUsuarioRepository } from "../../interfaces/http/repositories/usuarioRepository";
-
+import { IGrupoRepository } from "../../src/domain/interfaces/grupoRepository";
+import { IUsuarioRepository } from "../../src/domain/interfaces/usuarioRepository";
 
 export class AtribuirUsuarioGrupoUseCase {
   constructor(
@@ -22,6 +21,6 @@ export class AtribuirUsuarioGrupoUseCase {
       throw new Error('O usuário precisa pertencer a pelo menos um grupo.');
     }
 
-    await this.usuarioRepo.salvar(usuario);
+    await this.usuarioRepo.atualizar(usuario);
   }
 }

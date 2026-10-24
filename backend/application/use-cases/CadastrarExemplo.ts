@@ -1,4 +1,4 @@
-import { IExemploRepository } from "../../src/domain/interfaces/IExemploRepository.ts";
+import { IExemploRepository } from "../../src/domain/interfaces/IExemploRepository";
 
 export class CadastrarExemplo {
   constructor(private repository: IExemploRepository) {}

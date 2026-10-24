@@ -1,9 +1,9 @@
-import { IGrupoRepository } from "../../interfaces/http/repositories/grupoRepository";
+import { IGrupoRepository } from "../../src/domain/interfaces/grupoRepository";
 import { GrupoModel, PermissaoModel } from "../../src/core/models";
 import { Grupos } from "../../src/domain/entities/grupos";
 import { Permissoes } from "../../src/domain/entities/permissoes";
 
-export class SequelizeGrupoRepository implements IGrupoRepository {
+export class GrupoRepository implements IGrupoRepository {
   async salvar(grupo: Grupos): Promise<void> {
     const grupoModel = await GrupoModel.create({
       id: grupo.id,

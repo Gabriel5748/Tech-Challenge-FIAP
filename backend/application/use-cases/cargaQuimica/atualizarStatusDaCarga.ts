@@ -1,4 +1,4 @@
-import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository.ts";
+import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
 
 export class AtualizarStatusDaCarga {
   constructor(private repository: ICargaQuimicaRepository) {}

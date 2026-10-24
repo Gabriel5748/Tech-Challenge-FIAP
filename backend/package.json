@@ -6,7 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:up": "docker compose up -d",
-    "start": "tsx server.ts"
+    "start": "tsx server.ts",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:migrate:status": "sequelize-cli db:migrate:status",
+    "db:migration:generate": "sequelize-cli migration:generate"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +29,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
+    "sequelize-cli": "^6.6.5",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }

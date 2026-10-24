@@ -11,15 +11,30 @@ import { ProdutoQuimicoRepository } from "../infrastructure/repositories/produto
 import { CargaQuimicaController } from "../interfaces/http/controllers/cargaQuimica/cargaQuimicaController";
 import { ProdutoQuimicoController } from "../interfaces/http/controllers/produtoQuimico/produtoQuimicoController";
 
-const cargaQuimicaRepository = new CargaQuimicaRepository();
+// Users & Grupos
+import { UsuarioRepository } from "../infrastructure/repositories/usuarioRepository";
+import { GrupoRepository } from "../infrastructure/repositories/grupoRepository";
+import { AtribuirUsuarioGrupoUseCase } from "../application/use-cases/AtribuirUsuarioGrupo";
+import { UserController } from "../interfaces/http/controllers/users/userController";
 
+// Repositories
+const cargaQuimicaRepository = new CargaQuimicaRepository();
+const produtoQuimicoRepository = new ProdutoQuimicoRepository();
+export const usuarioRepository = new UsuarioRepository();
+export const grupoRepository = new GrupoRepository();
+
+// Use Cases
+export const atribuirUsuarioGrupoUseCase = new AtribuirUsuarioGrupoUseCase(
+  usuarioRepository,
+  grupoRepository
+);
+
+// Controllers
 export const cargaQuimicaController = new CargaQuimicaController(
   new RegistrarCargaQuimica(cargaQuimicaRepository),
   new BuscarCargaQuimicaPorIdentificador(cargaQuimicaRepository),
   new AtualizarStatusDaCarga(cargaQuimicaRepository),
 );
-
-const produtoQuimicoRepository = new ProdutoQuimicoRepository();
 
 export const produtoQuimicoController = new ProdutoQuimicoController(
   new CadastrarProdutoQuimico(produtoQuimicoRepository),
@@ -27,4 +42,10 @@ export const produtoQuimicoController = new ProdutoQuimicoController(
   new ListarProdutosQuimicos(produtoQuimicoRepository),
   new AtualizarProdutoQuimico(produtoQuimicoRepository),
   new InativarProdutoQuimico(produtoQuimicoRepository),
+);
+
+export const userController = new UserController(
+  usuarioRepository,
+  grupoRepository,
+  atribuirUsuarioGrupoUseCase
 );

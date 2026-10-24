@@ -1,16 +1,21 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../infrastructure/frameworks/database'
+import { sequelize } from '../../infrastructure/frameworks/database';
 
-interface UsuarioAttributes {
+/* =========================================================
+ * 1. USUÁRIO MODEL
+ * ========================================================= */
+export interface UsuarioAttributes {
   id: string;
   nomeCompleto: string;
   email: string;
   dataDeContratacao: Date;
   periodoTurno: string;
   status: 'ativo' | 'inativo';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id'> {}
+export interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id'> {}
 
 export class UsuarioModel extends Model<UsuarioAttributes, UsuarioCreationAttributes> implements UsuarioAttributes {
   public id!: string;
@@ -26,63 +31,158 @@ export class UsuarioModel extends Model<UsuarioAttributes, UsuarioCreationAttrib
 
 UsuarioModel.init(
   {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    nomeCompleto: { type: DataTypes.STRING, allowNull: false, field: 'nome_completo' },
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    dataDeContratacao: { type: DataTypes.DATE, allowNull: false, field: 'data_de_contratacao' },
-    periodoTurno: { type: DataTypes.STRING, allowNull: false, field: 'periodo_turno' },
-    status: { type: DataTypes.ENUM('ativo', 'inativo'), allowNull: false },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    nomeCompleto: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'nome_completo',
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    dataDeContratacao: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: 'data_de_contratacao',
+    },
+    periodoTurno: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'periodo_turno',
+    },
+    status: {
+      type: DataTypes.ENUM('ativo', 'inativo'),
+      allowNull: false,
+      defaultValue: 'ativo',
+    },
   },
-  { sequelize, modelName: 'Usuario', tableName: 'usuarios', timestamps: true }
+  {
+    sequelize,
+    modelName: 'Usuario',
+    tableName: 'usuarios',
+    timestamps: true,
+    underscored: true,
+  }
 );
 
-interface GrupoAttributes {
+/* =========================================================
+ * 2. GRUPO MODEL
+ * ========================================================= */
+export interface GrupoAttributes {
   id: string;
   nome: string;
   descricao: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-interface GrupoCreationAttributes extends Optional<GrupoAttributes, 'id'> {}
+export interface GrupoCreationAttributes extends Optional<GrupoAttributes, 'id'> {}
 
 export class GrupoModel extends Model<GrupoAttributes, GrupoCreationAttributes> implements GrupoAttributes {
   public id!: string;
   public nome!: string;
   public descricao!: string;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 GrupoModel.init(
   {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    nome: { type: DataTypes.STRING, allowNull: false },
-    descricao: { type: DataTypes.STRING, allowNull: false },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    nome: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    descricao: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { sequelize, modelName: 'Grupo', tableName: 'grupos', timestamps: true }
+  {
+    sequelize,
+    modelName: 'Grupo',
+    tableName: 'grupos',
+    timestamps: true,
+    underscored: true,
+  }
 );
 
-interface PermissaoAttributes {
+/* =========================================================
+ * 3. PERMISSÃO MODEL
+ * ========================================================= */
+export interface PermissaoAttributes {
   id: string;
   nomePermissao: string;
   descricao: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-interface PermissaoCreationAttributes extends Optional<PermissaoAttributes, 'id'> {}
+export interface PermissaoCreationAttributes extends Optional<PermissaoAttributes, 'id'> {}
 
 export class PermissaoModel extends Model<PermissaoAttributes, PermissaoCreationAttributes> implements PermissaoAttributes {
   public id!: string;
   public nomePermissao!: string;
   public descricao!: string;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 PermissaoModel.init(
   {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    nomePermissao: { type: DataTypes.STRING, allowNull: false, field: 'nome_permissao' },
-    descricao: { type: DataTypes.STRING, allowNull: false },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    nomePermissao: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'nome_permissao',
+    },
+    descricao: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { sequelize, modelName: 'Permissao', tableName: 'permissoes', timestamps: true }
+  {
+    sequelize,
+    modelName: 'Permissao',
+    tableName: 'permissoes',
+    timestamps: true,
+    underscored: true,
+  }
 );
 
-export class UsuarioGrupoModel extends Model {
+/* =========================================================
+ * 4. PIVOT: USUARIO_GRUPO MODEL
+ * ========================================================= */
+export interface UsuarioGrupoAttributes {
+  id: string;
+  usuarioId: string;
+  grupoId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface UsuarioGrupoCreationAttributes extends Optional<UsuarioGrupoAttributes, 'id'> {}
+
+export class UsuarioGrupoModel extends Model<UsuarioGrupoAttributes, UsuarioGrupoCreationAttributes> implements UsuarioGrupoAttributes {
   public id!: string;
   public usuarioId!: string;
   public grupoId!: string;
@@ -90,14 +190,53 @@ export class UsuarioGrupoModel extends Model {
 
 UsuarioGrupoModel.init(
   {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    usuarioId: { type: DataTypes.UUID, allowNull: false, field: 'usuario_fk' },
-    grupoId: { type: DataTypes.UUID, allowNull: false, field: 'grupo_fk' },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    usuarioId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'usuario_fk',
+      references: {
+        model: 'usuarios',
+        key: 'id',
+      },
+    },
+    grupoId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'grupo_fk',
+      references: {
+        model: 'grupos',
+        key: 'id',
+      },
+    },
   },
-  { sequelize, modelName: 'UsuarioGrupo', tableName: 'usuario_grupo', timestamps: false }
+  {
+    sequelize,
+    modelName: 'UsuarioGrupo',
+    tableName: 'usuario_grupo',
+    timestamps: true,
+    underscored: true,
+  }
 );
 
-export class GrupoPermissaoModel extends Model {
+/* =========================================================
+ * 5. PIVOT: GRUPO_PERMISSAO MODEL
+ * ========================================================= */
+export interface GrupoPermissaoAttributes {
+  id: string;
+  grupoId: string;
+  permissaoId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GrupoPermissaoCreationAttributes extends Optional<GrupoPermissaoAttributes, 'id'> {}
+
+export class GrupoPermissaoModel extends Model<GrupoPermissaoAttributes, GrupoPermissaoCreationAttributes> implements GrupoPermissaoAttributes {
   public id!: string;
   public grupoId!: string;
   public permissaoId!: string;
@@ -105,13 +244,234 @@ export class GrupoPermissaoModel extends Model {
 
 GrupoPermissaoModel.init(
   {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    grupoId: { type: DataTypes.UUID, allowNull: false, field: 'grupo_fk' },
-    permissaoId: { type: DataTypes.UUID, allowNull: false, field: 'permissao_fk' },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    grupoId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'grupo_fk',
+      references: {
+        model: 'grupos',
+        key: 'id',
+      },
+    },
+    permissaoId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'permissao_fk',
+      references: {
+        model: 'permissoes',
+        key: 'id',
+      },
+    },
   },
-  { sequelize, modelName: 'GrupoPermissao', tableName: 'grupo_permissao', timestamps: false }
+  {
+    sequelize,
+    modelName: 'GrupoPermissao',
+    tableName: 'grupo_permissao',
+    timestamps: true,
+    underscored: true,
+  }
 );
 
+/* =========================================================
+ * 6. PRODUTO QUÍMICO MODEL
+ * ========================================================= */
+export interface ProdutoQuimicoAttributes {
+  id: number;
+  nome: string;
+  formula?: string;
+  descricao?: string;
+  numeroONU?: string;
+  classeRisco?: string;
+  grupoCompatibilidade?: string;
+  ativo: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ProdutoQuimicoCreationAttributes extends Optional<ProdutoQuimicoAttributes, 'id' | 'ativo'> {}
+
+export class ProdutoQuimicoModel extends Model<ProdutoQuimicoAttributes, ProdutoQuimicoCreationAttributes> implements ProdutoQuimicoAttributes {
+  public id!: number;
+  public nome!: string;
+  public formula?: string;
+  public descricao?: string;
+  public numeroONU?: string;
+  public classeRisco?: string;
+  public grupoCompatibilidade?: string;
+  public ativo!: boolean;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
+ProdutoQuimicoModel.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    nome: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    formula: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    descricao: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    numeroONU: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'numero_onu',
+    },
+    classeRisco: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'classe_risco',
+    },
+    grupoCompatibilidade: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'grupo_compatibilidade',
+    },
+    ativo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'ProdutoQuimico',
+    tableName: 'produto_quimico',
+    timestamps: true,
+    underscored: true,
+  }
+);
+
+/* =========================================================
+ * 7. CARGA QUÍMICA MODEL
+ * ========================================================= */
+export interface CargaQuimicaAttributes {
+  id: number;
+  nome: string;
+  formula?: string;
+  produtoQuimicoId?: number;
+  quantidade?: number;
+  unidadeMedida?: string;
+  origem?: string;
+  destino?: string;
+  responsavelTecnico?: string;
+  documentacaoObrigatoria?: string[];
+  status: string;
+  dataEntrada?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface CargaQuimicaCreationAttributes extends Optional<CargaQuimicaAttributes, 'id' | 'status'> {}
+
+export class CargaQuimicaModel extends Model<CargaQuimicaAttributes, CargaQuimicaCreationAttributes> implements CargaQuimicaAttributes {
+  public id!: number;
+  public nome!: string;
+  public formula?: string;
+  public produtoQuimicoId?: number;
+  public quantidade?: number;
+  public unidadeMedida?: string;
+  public origem?: string;
+  public destino?: string;
+  public responsavelTecnico?: string;
+  public documentacaoObrigatoria?: string[];
+  public status!: string;
+  public dataEntrada?: Date;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
+CargaQuimicaModel.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    nome: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    formula: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    produtoQuimicoId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'produto_quimico_id',
+      references: {
+        model: 'produto_quimico',
+        key: 'id',
+      },
+    },
+    quantidade: {
+      type: DataTypes.DECIMAL,
+      allowNull: true,
+    },
+    unidadeMedida: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'unidade_medida',
+    },
+    origem: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    destino: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    responsavelTecnico: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'responsavel_tecnico',
+    },
+    documentacaoObrigatoria: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      field: 'documentacao_obrigatoria',
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'pendente',
+    },
+    dataEntrada: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'data_entrada',
+    },
+  },
+  {
+    sequelize,
+    modelName: 'CargaQuimica',
+    tableName: 'carga_quimica',
+    timestamps: true,
+    underscored: true,
+  }
+);
+
+/* =========================================================
+ * ASSOCIATIONS
+ * ========================================================= */
 UsuarioModel.belongsToMany(GrupoModel, {
   through: UsuarioGrupoModel,
   foreignKey: 'usuarioId',
@@ -138,4 +498,14 @@ PermissaoModel.belongsToMany(GrupoModel, {
   foreignKey: 'permissaoId',
   otherKey: 'grupoId',
   as: 'grupos',
+});
+
+CargaQuimicaModel.belongsTo(ProdutoQuimicoModel, {
+  foreignKey: 'produtoQuimicoId',
+  as: 'produtoQuimico',
+});
+
+ProdutoQuimicoModel.hasMany(CargaQuimicaModel, {
+  foreignKey: 'produtoQuimicoId',
+  as: 'cargas',
 });

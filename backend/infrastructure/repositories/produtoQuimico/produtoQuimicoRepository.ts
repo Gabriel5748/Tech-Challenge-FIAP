@@ -12,7 +12,7 @@ export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
 
   async buscarPorIdentificador(id: number) {
     const resultado = await pool.query(
-      `SELECT nome, formula FROM produto_quimico WHERE id = $1`,
+      `SELECT * FROM produto_quimico WHERE id = $1`,
       [id],
     );
     return resultado.rows;

@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { AtualizarStatusDaCarga } from "../../../../application/use-cases/cargaQuimica/atualizarStatusDaCarga";
+import { bloquearCargaQuimica } from "../../../../application/use-cases/cargaQuimica/bloquearCargaQuimica";
 import { BuscarCargaQuimicaPorIdentificador } from "../../../../application/use-cases/cargaQuimica/buscarCargaQuimicaPorIdentificador";
+import { cancelarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/cancelarCargaQuimica";
+import { liberarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/liberarCargaQuimica";
 import { RegistrarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/registrarCargaQuimica";
 
 export class CargaQuimicaController {
@@ -8,6 +11,10 @@ export class CargaQuimicaController {
     private registrarCargaQuimica: RegistrarCargaQuimica,
     private buscarCargaQuimica: BuscarCargaQuimicaPorIdentificador,
     private atualizarStatusCargaQuimica: AtualizarStatusDaCarga,
+    private buscarCargaQuimicaPorIdentificador: BuscarCargaQuimicaPorIdentificador,
+    private bloquearCargaQuimica: bloquearCargaQuimica,
+    private liberarCargaQuimica: liberarCargaQuimica,
+    private cancelarCargaQuimica: cancelarCargaQuimica,
   ) {}
   async cadastrar(req: Request, res: Response) {
     const { nome, formula } = req.body;
@@ -82,6 +89,119 @@ export class CargaQuimicaController {
         id,
         status,
       );
+
+      if (resultado.length === 0) {
+        return res.status(404).json({
+          erro: "Carga química não encontrada",
+        });
+      }
+
+      return res.status(200).json(resultado);
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro ao atualizar status da carga",
+      });
+    }
+  }
+
+  async buscarPorIdentificador(req: Request, res: Response) {
+    const id = req.query.id;
+
+    if (typeof id !== "number" || id <= 0) {
+      return res.status(400).json({
+        erro: "Conteúdo inválido",
+      });
+    }
+
+    try {
+      const resultado =
+        await this.buscarCargaQuimicaPorIdentificador.execute(id);
+
+      if (resultado.length === 0) {
+        return res.status(404).json({
+          erro: "Carga química não encontrada",
+        });
+      }
+
+      return res.status(200).json(resultado);
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro ao consultar dados",
+      });
+    }
+  }
+
+  async bloquear(req: Request, res: Response) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "Identificador inválido",
+      });
+    }
+
+    try {
+      const resultado = await this.bloquearCargaQuimica.execute(id);
+
+      if (resultado.length === 0) {
+        return res.status(404).json({
+          erro: "Carga química não encontrada",
+        });
+      }
+
+      return res.status(200).json(resultado);
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro ao atualizar status da carga",
+      });
+    }
+  }
+
+  async liberar(req: Request, res: Response) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "Identificador inválido",
+      });
+    }
+
+    try {
+      const resultado = await this.liberarCargaQuimica.execute(id);
+
+      if (resultado.length === 0) {
+        return res.status(404).json({
+          erro: "Carga química não encontrada",
+        });
+      }
+
+      return res.status(200).json(resultado);
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro ao atualizar status da carga",
+      });
+    }
+  }
+
+  async cancelar(req: Request, res: Response) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "Identificador inválido",
+      });
+    }
+
+    try {
+      const resultado = await this.cancelarCargaQuimica.execute(id);
 
       if (resultado.length === 0) {
         return res.status(404).json({

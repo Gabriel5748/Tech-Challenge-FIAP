@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela execuções antigas da mesma branch quando um novo push chega
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build e testes (backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        # AJUSTE: nome da pasta do backend no repositório (onde ficam package.json, Dockerfile e compose.yaml)
+        working-directory: backend
+
+    # PostgreSQL efêmero para os testes de integração.
+    # Os valores batem com os padrões do config.js (ambiente "test").
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: QuimiportDB_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test # faz o config.js e o sequelize-cli usarem o ambiente "test"
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME_TEST: QuimiportDB_test
+      DB_HOST: localhost
+      DB_PORT: 5432
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # mesma versão do Dockerfile (FROM node:22)
+          cache: npm
+          cache-dependency-path: backend/package-lock.json # AJUSTE junto com a pasta acima
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build / compilação (TypeScript)
+        run: npm run build
+
+      - name: Aplicar migrations no banco de teste
+        run: npm run db:migrate # remova se os testes não usam banco
+
+      - name: Executar testes
+        run: npm test
+
+      - name: Validar documentação da API (OpenAPI)
+        run: npx --yes @apidevtools/swagger-cli validate ../documentacao/openapi.yaml
+
+  docker:
+    name: Validação do Docker
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: backend # AJUSTE
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      # O compose.yaml usa "env_file: .env", e o .env não vai para o Git.
+      # Por isso o repositório precisa ter um .env.example commitado.
+      - name: Criar .env a partir do exemplo
+        run: cp .env.example .env
+
+      - name: Validar compose.yaml
+        run: docker compose config --quiet
+
+      - name: Construir imagem da API
+        run: docker build -t quimiport-api:ci .

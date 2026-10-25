@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const container_1 = require("../../../../src/container");
+const router = (0, express_1.Router)();
+router.post("/", (req, res) => container_1.produtoQuimicoController.cadastrar(req, res));
+router.get("/", (req, res) => container_1.produtoQuimicoController.listar(req, res));
+router.get("/:id", (req, res) => container_1.produtoQuimicoController.buscar(req, res));
+router.patch("/:id", (req, res) => container_1.produtoQuimicoController.atualizar(req, res));
+router.delete("/:id", (req, res) => container_1.produtoQuimicoController.inativar(req, res));
+exports.default = router;

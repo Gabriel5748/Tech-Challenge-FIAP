@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import { AtualizarStatusDaCarga } from "../../../../application/use-cases/cargaQuimica/atualizarStatusDaCarga";
-import { bloquearCargaQuimica } from "../../../../application/use-cases/cargaQuimica/bloquearCargaQuimica";
+import { BloquearCargaQuimica } from "../../../../application/use-cases/cargaQuimica/bloquearCargaQuimica";
 import { BuscarCargaQuimicaPorIdentificador } from "../../../../application/use-cases/cargaQuimica/buscarCargaQuimicaPorIdentificador";
-import { cancelarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/cancelarCargaQuimica";
-import { liberarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/liberarCargaQuimica";
+import { CancelarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/cancelarCargaQuimica";
+import { LiberarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/liberarCargaQuimica";
 import { RegistrarCargaQuimica } from "../../../../application/use-cases/cargaQuimica/registrarCargaQuimica";
 
 export class CargaQuimicaController {
@@ -12,9 +12,9 @@ export class CargaQuimicaController {
     private buscarCargaQuimica: BuscarCargaQuimicaPorIdentificador,
     private atualizarStatusCargaQuimica: AtualizarStatusDaCarga,
     private buscarCargaQuimicaPorIdentificador: BuscarCargaQuimicaPorIdentificador,
-    private bloquearCargaQuimica: bloquearCargaQuimica,
-    private liberarCargaQuimica: liberarCargaQuimica,
-    private cancelarCargaQuimica: cancelarCargaQuimica,
+    private bloquearCargaQuimica: BloquearCargaQuimica,
+    private liberarCargaQuimica: LiberarCargaQuimica,
+    private cancelarCargaQuimica: CancelarCargaQuimica,
   ) {}
   async cadastrar(req: Request, res: Response) {
     const { nome, formula } = req.body;

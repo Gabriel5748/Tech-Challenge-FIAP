@@ -22,7 +22,6 @@ jobs:
 
     defaults:
       run:
-        # AJUSTE: nome da pasta do backend no repositório (onde ficam package.json, Dockerfile e compose.yaml)
         working-directory: backend
 
     # PostgreSQL efêmero para os testes de integração.

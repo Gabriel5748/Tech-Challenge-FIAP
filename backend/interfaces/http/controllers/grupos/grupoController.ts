@@ -53,7 +53,7 @@ export class GrupoController {
 
     try {
       const novoGrupo = new Grupos(
-        "", // ID gerado automaticamente
+        "",
         nome.trim(),
         descricao ? String(descricao).trim() : ""
       );

@@ -45,16 +45,24 @@ export class UserController {
 
       const statusUsuario = status === 'inativo' ? 'inativo' : 'ativo';
 
-      // Verificar unicidade de e-mail
+      // Regra 4.1: Unicidade de credencial/e-mail
       const emailExistente = await this.usuarioRepository.buscarPorEmail(email.trim());
       if (emailExistente) {
-        return res.status(409).json({ erro: 'Já existe um usuário cadastrado com este e-mail.' });
+        return res.status(409).json({ erro: 'Já existe um usuário cadastrado com este e-mail (Regra 4.1).' });
+      }
+
+      // Regra 4.12: Todo usuário deve pertencer a pelo menos um grupo
+      if (!Array.isArray(gruposIds) || gruposIds.length === 0) {
+        return res.status(400).json({ erro: 'Todo usuário deve pertencer a pelo menos um grupo (Regra 4.12).' });
       }
 
       // Buscar grupos vinculados se fornecidos
       let gruposDomain: any[] = [];
-      if (Array.isArray(gruposIds) && gruposIds.length > 0 && this.grupoRepository) {
+      if (this.grupoRepository) {
         gruposDomain = await this.grupoRepository.listarPorIds(gruposIds);
+        if (gruposDomain.length === 0) {
+          return res.status(400).json({ erro: 'Nenhum dos grupos informados foi encontrado.' });
+        }
       }
 
       // Criar entidade de domínio Usuario (id gerado pelo banco ou crypto)

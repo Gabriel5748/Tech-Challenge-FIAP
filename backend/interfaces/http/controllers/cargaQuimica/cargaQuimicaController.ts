@@ -25,25 +25,30 @@ export class CargaQuimicaController {
   }
 
   async cadastrar(req: Request, res: Response) {
-    const { nome, formula } = req.body;
+    const { nome, formula, produtoQuimicoId, quantidade } = req.body;
 
     if (typeof nome !== "string" || typeof formula !== "string") {
       return res.status(400).json({
-        erro: "Conteúdo inválido",
+        erro: "Conteúdo inválido: nome e fórmula são obrigatórios.",
       });
     }
 
     try {
-      await this.registrarCargaQuimica.execute(nome, formula);
+      await this.registrarCargaQuimica.execute({
+        nome,
+        formula,
+        produtoQuimicoId: produtoQuimicoId ? Number(produtoQuimicoId) : undefined,
+        quantidade: quantidade !== undefined ? Number(quantidade) : undefined,
+      });
 
       return res.status(201).json({
         mensagem: "Cadastro realizado com sucesso",
       });
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, body: req.body }, "Erro ao cadastrar carga química");
 
-      return res.status(500).json({
-        erro: "Erro ao cadastrar dados",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao cadastrar dados",
       });
     }
   }
@@ -67,11 +72,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, nome }, "Erro ao consultar carga química por nome");
 
-      return res.status(500).json({
-        erro: "Erro ao consultar dados",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao consultar dados",
       });
     }
   }
@@ -105,11 +110,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, id, status }, "Erro ao atualizar status da carga");
 
-      return res.status(500).json({
-        erro: "Erro ao atualizar status da carga",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao atualizar status da carga",
       });
     }
   }
@@ -134,11 +139,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, id }, "Erro ao consultar carga química por identificador");
 
-      return res.status(500).json({
-        erro: "Erro ao consultar dados",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao consultar dados",
       });
     }
   }
@@ -162,11 +167,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, id }, "Erro ao bloquear status da carga");
 
-      return res.status(500).json({
-        erro: "Erro ao atualizar status da carga",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao atualizar status da carga",
       });
     }
   }
@@ -190,11 +195,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, id }, "Erro ao liberar status da carga");
 
-      return res.status(500).json({
-        erro: "Erro ao atualizar status da carga",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao atualizar status da carga",
       });
     }
   }
@@ -218,11 +223,11 @@ export class CargaQuimicaController {
       }
 
       return res.status(200).json(resultado);
-    } catch (erro) {
+    } catch (erro: any) {
       this.getLogger(req).error({ erro, id }, "Erro ao cancelar status da carga");
 
-      return res.status(500).json({
-        erro: "Erro ao atualizar status da carga",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao atualizar status da carga",
       });
     }
   }

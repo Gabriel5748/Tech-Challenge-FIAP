@@ -34,7 +34,7 @@ export const atribuirUsuarioGrupoUseCase = new AtribuirUsuarioGrupoUseCase(
 
 // Controllers
 export const cargaQuimicaController = new CargaQuimicaController(
-  new RegistrarCargaQuimica(cargaQuimicaRepository),
+  new RegistrarCargaQuimica(cargaQuimicaRepository, produtoQuimicoRepository),
   new BuscarCargaQuimicaPorIdentificador(cargaQuimicaRepository),
   new AtualizarStatusDaCarga(cargaQuimicaRepository),
   new BuscarCargaQuimicaPorIdentificador(cargaQuimicaRepository),

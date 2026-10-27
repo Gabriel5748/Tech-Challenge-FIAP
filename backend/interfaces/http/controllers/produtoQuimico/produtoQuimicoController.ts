@@ -4,6 +4,9 @@ import { BuscarProdutoQuimicoPorIdentificador } from "../../../../application/us
 import { CadastrarProdutoQuimico } from "../../../../application/use-cases/produtoQuimico/cadastrarProdutoQuimico";
 import { InativarProdutoQuimico } from "../../../../application/use-cases/produtoQuimico/inativarProdutoQuimico";
 import { ListarProdutosQuimicos } from "../../../../application/use-cases/produtoQuimico/listarProdutoQuimico";
+import { logger } from "../../../../infrastructure/logger";
+
+// Implementar Regras de Negocio
 
 function parseId(value: unknown): number | null {
   if (typeof value !== "string") {
@@ -22,6 +25,10 @@ export class ProdutoQuimicoController {
     private atualizarProdutoQuimico: AtualizarProdutoQuimico,
     private inativarProdutoQuimico: InativarProdutoQuimico,
   ) {}
+
+  private getLogger(req: Request) {
+    return (req as any).log || logger;
+  }
 
   async cadastrar(req: Request, res: Response) {
     const { nome, formula } = req.body;
@@ -44,7 +51,7 @@ export class ProdutoQuimicoController {
         mensagem: "Produto químico cadastrado com sucesso",
       });
     } catch (erro) {
-      console.error(erro);
+      this.getLogger(req).error({ erro, body: req.body }, "Erro ao cadastrar produto químico");
 
       return res.status(500).json({
         erro: "Erro ao cadastrar produto químico",
@@ -57,7 +64,7 @@ export class ProdutoQuimicoController {
       const resultado = await this.listarProdutosQuimicos.execute();
       return res.status(200).json(resultado);
     } catch (erro) {
-      console.error(erro);
+      this.getLogger(req).error({ erro }, "Erro ao listar produtos químicos");
 
       return res.status(500).json({
         erro: "Erro ao listar produtos químicos",
@@ -85,7 +92,7 @@ export class ProdutoQuimicoController {
 
       return res.status(200).json(resultado[0]);
     } catch (erro) {
-      console.error(erro);
+      this.getLogger(req).error({ erro, id }, "Erro ao consultar produto químico");
 
       return res.status(500).json({
         erro: "Erro ao consultar produto químico",
@@ -117,7 +124,7 @@ export class ProdutoQuimicoController {
 
       return res.status(200).json(resultado[0]);
     } catch (erro) {
-      console.error(erro);
+      this.getLogger(req).error({ erro, id, formula }, "Erro ao atualizar produto químico");
 
       return res.status(500).json({
         erro: "Erro ao atualizar produto químico",
@@ -145,7 +152,7 @@ export class ProdutoQuimicoController {
 
       return res.status(200).json(resultado[0]);
     } catch (erro) {
-      console.error(erro);
+      this.getLogger(req).error({ erro, id }, "Erro ao inativar produto químico");
 
       return res.status(500).json({
         erro: "Erro ao inativar produto químico",

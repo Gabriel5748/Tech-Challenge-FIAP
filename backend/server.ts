@@ -4,7 +4,10 @@ import swaggerUI from "swagger-ui-express";
 
 import { generateOpenApiDocument } from "./infrastructure/frameworks/openapi";
 import { settings } from "./infrastructure/frameworks/settings";
+import { logger } from "./infrastructure/logger";
 
+import errorHandler from "./interfaces/http/middlewares/errorHandler";
+import httpLogger from "./interfaces/http/middlewares/httpLogger";
 import cargaQuimicaRouter from "./interfaces/http/routers/cargaQuimica/cargaQuimicaRoute";
 import produtoQuimicoRouter from "./interfaces/http/routers/produtoQuimico/produtoQuimicoRoute";
 import routerUser from "./interfaces/http/routers/users/users";
@@ -13,14 +16,17 @@ const app = express();
 
 const openApiDoc = generateOpenApiDocument();
 
-// CORS
+// 1. Logger de requisições HTTP (pino-http)
+app.use(httpLogger);
+
+// 2. CORS
 app.use(
   cors({
     origin: settings.app.allowedHosts,
   }),
 );
 
-// Middleware
+// 3. Parser JSON
 app.use(express.json());
 
 // Documentação Swagger UI
@@ -51,15 +57,32 @@ app.use("/api/usuarios", routerUser);
 app.use("/api/cargas", cargaQuimicaRouter);
 app.use("/api/produtos-quimicos", produtoQuimicoRouter);
 
-app.listen(settings.app.port, settings.app.host, () => {
-  console.log(
+// Middleware global de tratamento e log de erros
+app.use(errorHandler);
+
+const server = app.listen(settings.app.port, settings.app.host, () => {
+  logger.info(
     `Servidor rodando em http://${settings.app.host}:${settings.app.port}`,
   );
-
-  console.log(
+  logger.info(
     `Documentação Swagger: http://${settings.app.host}:${settings.app.port}/api/docs`,
   );
-  console.log(
+  logger.info(
     `Especificação JSON: http://${settings.app.host}:${settings.app.port}/api/docs.json`,
   );
 });
+
+// Captura de exceções e rejeições não tratadas no processo
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "Exceção não tratada capturada (uncaughtException)!");
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error(
+    { reason },
+    "Promessa rejeitada não tratada (unhandledRejection)!",
+  );
+});
+
+export default app;

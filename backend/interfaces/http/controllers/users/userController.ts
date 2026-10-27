@@ -3,6 +3,7 @@ import { IUsuarioRepository } from '../../../../src/domain/interfaces/usuarioRep
 import { IGrupoRepository } from '../../../../src/domain/interfaces/grupoRepository';
 import { Usuario } from '../../../../src/domain/entities/usuarios';
 import { AtribuirUsuarioGrupoUseCase } from '../../../../application/use-cases/AtribuirUsuarioGrupo';
+import { logger } from '../../../../infrastructure/logger';
 
 export class UserController {
   constructor(
@@ -10,6 +11,10 @@ export class UserController {
     private readonly grupoRepository?: IGrupoRepository,
     private readonly atribuirUsuarioGrupoUseCase?: AtribuirUsuarioGrupoUseCase
   ) {}
+
+  private getLogger(req: Request) {
+    return (req as any).log || logger;
+  }
 
   // POST /api/usuarios - Cadastrar novo usuário
   async cadastrar(req: Request, res: Response): Promise<Response> {
@@ -73,7 +78,7 @@ export class UserController {
         usuario: usuarioCriado || novoUsuario,
       });
     } catch (error: any) {
-      console.error('Erro ao cadastrar usuário:', error);
+      this.getLogger(req).error({ error, body: req.body }, 'Erro ao cadastrar usuário');
       return res.status(500).json({
         erro: 'Erro interno ao cadastrar usuário',
         detalhes: error.message,
@@ -87,7 +92,7 @@ export class UserController {
       const usuarios = await this.usuarioRepository.listarTodos();
       return res.status(200).json(usuarios);
     } catch (error: any) {
-      console.error('Erro ao listar usuários:', error);
+      this.getLogger(req).error({ error }, 'Erro ao listar usuários');
       return res.status(500).json({
         erro: 'Erro interno ao listar usuários',
         detalhes: error.message,
@@ -122,7 +127,7 @@ export class UserController {
 
       return res.status(200).json(usuario);
     } catch (error: any) {
-      console.error('Erro ao buscar usuário por ID:', error);
+      this.getLogger(req).error({ error, id: req.params.id }, 'Erro ao buscar usuário por ID');
       return res.status(500).json({
         erro: 'Erro ao buscar usuário',
         detalhes: error.message,
@@ -182,7 +187,7 @@ export class UserController {
         usuario: resultadoFinal || usuarioAtualizado,
       });
     } catch (error: any) {
-      console.error('Erro ao atualizar usuário:', error);
+      this.getLogger(req).error({ error, id: req.params.id, body: req.body }, 'Erro ao atualizar usuário');
       return res.status(500).json({
         erro: 'Erro ao atualizar usuário',
         detalhes: error.message,
@@ -207,7 +212,7 @@ export class UserController {
       await this.usuarioRepository.deletar(id);
       return res.status(204).send();
     } catch (error: any) {
-      console.error('Erro ao deletar usuário:', error);
+      this.getLogger(req).error({ error, id: req.params.id }, 'Erro ao deletar usuário');
       return res.status(500).json({
         erro: 'Erro ao deletar usuário',
         detalhes: error.message,
@@ -245,7 +250,7 @@ export class UserController {
 
       return res.status(200).json({ mensagem: 'Grupo atribuído com sucesso ao usuário.' });
     } catch (error: any) {
-      console.error('Erro ao atribuir grupo:', error);
+      this.getLogger(req).error({ error, id: req.params.id, body: req.body }, 'Erro ao atribuir grupo');
       return res.status(400).json({
         erro: 'Erro ao atribuir grupo ao usuário',
         detalhes: error.message,

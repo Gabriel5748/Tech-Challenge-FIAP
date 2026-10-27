@@ -1,12 +1,14 @@
+import { ProdutoQuimico } from "../../../src/domain/entities/produtoQuimico";
 import { IProdutoQuimicoRepository } from "../../../src/domain/interfaces/IProdutoQuimicoRepository";
 import { pool } from "../../database/database";
 
 export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
-  async criar(nome: string, formula: string) {
+  // Corrigir para criar a produto quíimico enviada pelo frontend
+  async criar(produtoQuimico: ProdutoQuimico) {
     await pool.query(
       `INSERT INTO produto_quimico (nome, formula)
        VALUES ($1, $2)`,
-      [nome, formula],
+      // [nome, formula], -> Produto Químico
     );
   }
 

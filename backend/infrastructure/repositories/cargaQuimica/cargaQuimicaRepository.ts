@@ -1,12 +1,13 @@
+import { Carga } from "../../../src/domain/entities/cargaQuimica";
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
 import { pool } from "../../database/database";
 
 export class CargaQuimicaRepository implements ICargaQuimicaRepository {
-  async registrar(nome: string, formula: string) {
+  async registrar(carga: Carga) {
     await pool.query(
       `INSERT INTO carga_quimica (nome, formula)
        VALUES ($1, $2)`,
-      [nome, formula],
+      // [nome, formula], -> carga
     );
   }
 

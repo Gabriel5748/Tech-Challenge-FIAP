@@ -15,9 +15,9 @@ export const CargaQuimicaSchema = registry.register(
       description: "Fórmula química correspondente",
       example: "HCl",
     }),
-    status: z.enum(["bloqueado", "liberado", "cancelado"]).openapi({
+    status: z.enum(["bloqueado", "liberado", "cancelado", "pendente"]).openapi({
       description: "Status atual da carga",
-      example: "liberado",
+      example: "pendente",
     }),
   }).openapi({
     description: "Entidade de Carga Química",

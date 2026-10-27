@@ -22,7 +22,13 @@ export function registerCargaQuimicaRoutesDoc() {
       },
     },
     responses: {
-      201: successMessageResponse("Cadastro realizado com sucesso"),
+      201: jsonContent(
+        z.object({
+          mensagem: z.string().openapi({ example: "Cadastro realizado com sucesso" }),
+          carga: CargaQuimicaSchema,
+        }),
+        "Cadastro realizado com sucesso"
+      ),
       400: errorResponse("Conteúdo inválido (nome ou fórmula inválidos)"),
       500: errorResponse("Erro ao cadastrar dados"),
     },
@@ -32,12 +38,12 @@ export function registerCargaQuimicaRoutesDoc() {
     method: "get",
     path: "/api/cargas",
     tags: ["Cargas Químicas"],
-    summary: "Buscar carga química por nome",
-    description: "Pesquisa cargas químicas cadastradas através do parâmetro de busca por nome.",
+    summary: "Listar ou buscar cargas químicas por nome",
+    description: "Retorna todas as cargas químicas cadastradas ou filtra através do parâmetro opcional de busca por nome.",
     request: {
       query: z.object({
-        nome: z.string().openapi({
-          description: "Nome ou termo de busca da carga química",
+        nome: z.string().optional().openapi({
+          description: "Nome ou termo de busca da carga química (opcional)",
           example: "Ácido Clorídrico",
         }),
       }),

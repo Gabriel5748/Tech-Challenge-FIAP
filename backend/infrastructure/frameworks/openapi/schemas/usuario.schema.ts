@@ -20,6 +20,22 @@ export const GrupoSchema = registry.register(
   })
 );
 
+export const NovoGrupoSchema = registry.register(
+  "NovoGrupoInput",
+  z.object({
+    nome: z.string().min(1, "O nome do grupo é obrigatório").openapi({
+      description: "Nome do grupo de permissões",
+      example: "Operadores",
+    }),
+    descricao: z.string().optional().openapi({
+      description: "Descrição das atribuições do grupo",
+      example: "Operadores portuários responsáveis pela movimentação",
+    }),
+  }).openapi({
+    description: "Dados para cadastro de um novo grupo",
+  })
+);
+
 export const UsuarioSchema = registry.register(
   "Usuario",
   z.object({
@@ -78,12 +94,8 @@ export const NovoUsuarioSchema = registry.register(
       description: "Status inicial do usuário",
       example: "ativo",
     }),
-    gruposIds: z.array(z.string()).optional().openapi({
-      description: "Lista opcional de IDs dos grupos para associação imediata",
-      example: ["b1a7d6e4-3209-4ce1-8fa1-7f9cb814041b"],
-    }),
   }).openapi({
-    description: "Dados para cadastro de um novo usuário",
+    description: "Dados para cadastro de um novo usuário (vínculo com grupos feito via /api/usuarios/{id}/grupos)",
   })
 );
 
@@ -104,9 +116,6 @@ export const AtualizarUsuarioSchema = registry.register(
     }),
     status: z.enum(["ativo", "inativo"]).optional().openapi({
       example: "ativo",
-    }),
-    gruposIds: z.array(z.string()).optional().openapi({
-      example: ["b1a7d6e4-3209-4ce1-8fa1-7f9cb814041b"],
     }),
   }).openapi({
     description: "Dados para atualização de um usuário existente",

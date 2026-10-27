@@ -30,7 +30,7 @@ export class GrupoController {
     }
 
     try {
-      const grupo = await this.grupoRepository.buscarPorId(id);
+      const grupo = await this.grupoRepository.buscarPorId(String(id));
       if (!grupo) {
         return res.status(404).json({ erro: "Grupo não encontrado." });
       }
@@ -53,7 +53,7 @@ export class GrupoController {
 
     try {
       const novoGrupo = new Grupos(
-        "",
+        "", // ID gerado automaticamente
         nome.trim(),
         descricao ? String(descricao).trim() : ""
       );

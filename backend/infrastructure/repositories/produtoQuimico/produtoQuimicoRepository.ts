@@ -1,43 +1,50 @@
-import { ProdutoQuimico } from "../../../src/domain/entities/produtoQuimico";
 import { IProdutoQuimicoRepository } from "../../../src/domain/interfaces/IProdutoQuimicoRepository";
-import { pool } from "../../database/database";
+import { ProdutoQuimicoModel } from "../../../src/core/models";
 
 export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
-  // Corrigir para criar a produto quíimico enviada pelo frontend
-  async criar(produtoQuimico: ProdutoQuimico) {
-    await pool.query(
-      `INSERT INTO produto_quimico (nome, formula)
-       VALUES ($1, $2)`,
-      // [nome, formula], -> Produto Químico
-    );
+  async criar(nome: string, formula: string): Promise<void> {
+    await ProdutoQuimicoModel.create({
+      nome,
+      formula,
+      ativo: true,
+    });
   }
 
-  async buscarPorIdentificador(id: number) {
-    const resultado = await pool.query(
-      `SELECT * FROM produto_quimico WHERE id = $1`,
-      [id],
-    );
-    return resultado.rows;
+  async buscarPorIdentificador(id: number): Promise<any[]> {
+    const registro = await ProdutoQuimicoModel.findByPk(id);
+    return registro ? [registro.toJSON()] : [];
   }
 
-  async listar() {
-    const resultado = await pool.query(`SELECT * FROM produto_quimico`, []);
-    return resultado.rows;
+  async listar(): Promise<any[]> {
+    const registros = await ProdutoQuimicoModel.findAll();
+    return registros.map((r) => r.toJSON());
   }
 
-  async atualizar(formula: string, id: number) {
-    const resultado = await pool.query(
-      `UPDATE produto_quimico SET formula = $1 WHERE id = $2 RETURNING *`,
-      [formula, id],
+  async atualizar(formula: string, id: number): Promise<any[]> {
+    const [afetados] = await ProdutoQuimicoModel.update(
+      { formula },
+      { where: { id } }
     );
-    return resultado.rows;
+
+    if (afetados === 0) {
+      return [];
+    }
+
+    const atualizado = await ProdutoQuimicoModel.findByPk(id);
+    return atualizado ? [atualizado.toJSON()] : [];
   }
 
-  async inativar(id: number) {
-    const resultado = await pool.query(
-      `UPDATE produto_quimico SET ativo = false WHERE id = $1 RETURNING *`,
-      [id],
+  async inativar(id: number): Promise<any[]> {
+    const [afetados] = await ProdutoQuimicoModel.update(
+      { ativo: false },
+      { where: { id } }
     );
-    return resultado.rows;
+
+    if (afetados === 0) {
+      return [];
+    }
+
+    const inativado = await ProdutoQuimicoModel.findByPk(id);
+    return inativado ? [inativado.toJSON()] : [];
   }
 }

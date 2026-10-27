@@ -1,6 +1,6 @@
 export interface ICargaQuimicaRepository {
   registrar(nome: string, formula: string): Promise<void>;
-  buscarPorIdentificador(nome: string): Promise<any[]>;
+  buscarPorIdentificador(identificador: string | number): Promise<any[]>;
   listar(): Promise<any[]>;
   atualizarStatus(id: number, status: string): Promise<any[]>;
   bloquear(id: number): Promise<any[]>;

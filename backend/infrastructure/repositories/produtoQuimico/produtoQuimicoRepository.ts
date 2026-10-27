@@ -2,12 +2,24 @@ import { IProdutoQuimicoRepository } from "../../../src/domain/interfaces/IProdu
 import { ProdutoQuimicoModel } from "../../../src/core/models";
 
 export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
-  async criar(nome: string, formula: string): Promise<void> {
-    await ProdutoQuimicoModel.create({
-      nome,
-      formula,
-      ativo: true,
-    });
+  async criar(dados: any, formulaParam?: string): Promise<void> {
+    if (typeof dados === "string") {
+      await ProdutoQuimicoModel.create({
+        nome: dados,
+        formula: formulaParam || "",
+        ativo: true,
+      });
+    } else {
+      await ProdutoQuimicoModel.create({
+        nome: dados.nome,
+        formula: dados.formula,
+        descricao: dados.descricao,
+        numeroONU: dados.numeroONU || dados.numero_onu,
+        classeRisco: dados.classeRisco || dados.classe_risco,
+        grupoCompatibilidade: dados.grupoCompatibilidade || dados.grupo_compatibilidade,
+        ativo: dados.ativo !== undefined ? dados.ativo : true,
+      });
+    }
   }
 
   async buscarPorIdentificador(id: number): Promise<any[]> {
@@ -20,11 +32,12 @@ export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
     return registros.map((r) => r.toJSON());
   }
 
-  async atualizar(formula: string, id: number): Promise<any[]> {
-    const [afetados] = await ProdutoQuimicoModel.update(
-      { formula },
-      { where: { id } }
-    );
+  async atualizar(dados: any, id: number): Promise<any[]> {
+    const updateData = typeof dados === "string" ? { formula: dados } : dados;
+
+    const [afetados] = await ProdutoQuimicoModel.update(updateData, {
+      where: { id },
+    });
 
     if (afetados === 0) {
       return [];

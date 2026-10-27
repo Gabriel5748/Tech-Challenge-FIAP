@@ -64,6 +64,6 @@ export class RegistrarCargaQuimica {
       }
     }
 
-    return this.repository.registrar(input.nome, input.formula);
+    return this.repository.registrar(input as any);
   }
 }

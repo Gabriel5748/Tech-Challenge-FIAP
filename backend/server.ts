@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import swaggerUI from "swagger-ui-express";
 
+import { sequelize } from "./infrastructure/frameworks/database";
 import { generateOpenApiDocument } from "./infrastructure/frameworks/openapi";
 import { settings } from "./infrastructure/frameworks/settings";
 import { logger } from "./infrastructure/logger";
@@ -9,6 +10,7 @@ import { logger } from "./infrastructure/logger";
 import errorHandler from "./interfaces/http/middlewares/errorHandler";
 import httpLogger from "./interfaces/http/middlewares/httpLogger";
 import cargaQuimicaRouter from "./interfaces/http/routers/cargaQuimica/cargaQuimicaRoute";
+import grupoRouter from "./interfaces/http/routers/grupos/grupos";
 import produtoQuimicoRouter from "./interfaces/http/routers/produtoQuimico/produtoQuimicoRoute";
 import routerUser from "./interfaces/http/routers/users/users";
 
@@ -54,13 +56,21 @@ app.get("/", (_req, res) => {
 
 // Rotas da aplicação
 app.use("/api/usuarios", routerUser);
+app.use("/api/grupos", grupoRouter);
 app.use("/api/cargas", cargaQuimicaRouter);
 app.use("/api/produtos-quimicos", produtoQuimicoRouter);
 
 // Middleware global de tratamento e log de erros
 app.use(errorHandler);
 
-const server = app.listen(settings.app.port, settings.app.host, () => {
+const server = app.listen(settings.app.port, settings.app.host, async () => {
+  try {
+    await sequelize.authenticate();
+    logger.info("Banco de dados PostgreSQL conectado com sucesso via Sequelize!");
+  } catch (err: any) {
+    logger.error({ err }, "Falha ao conectar no banco de dados PostgreSQL!");
+  }
+
   logger.info(
     `Servidor rodando em http://${settings.app.host}:${settings.app.port}`,
   );

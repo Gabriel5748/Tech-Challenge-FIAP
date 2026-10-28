@@ -1,4 +1,3 @@
-// src/infrastructure/frameworks/database.ts
 import { Sequelize } from 'sequelize';
 import { logger } from '../logger';
 import { settings } from './settings';

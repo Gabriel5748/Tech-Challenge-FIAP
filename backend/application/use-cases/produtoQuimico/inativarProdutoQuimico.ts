@@ -10,7 +10,6 @@ export class InativarProdutoQuimico {
       throw new Error("Produto químico não encontrado.");
     }
 
-    // Regra 4.6 e 4.16: Inativa o produto químico no sistema
     return this.repository.inativar(id);
   }
 }

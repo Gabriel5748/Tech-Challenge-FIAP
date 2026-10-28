@@ -6,8 +6,6 @@ import { InativarProdutoQuimico } from "../../../../application/use-cases/produt
 import { ListarProdutosQuimicos } from "../../../../application/use-cases/produtoQuimico/listarProdutoQuimico";
 import { logger } from "../../../../infrastructure/logger";
 
-// Implementar Regras de Negocio
-
 function parseId(value: unknown): number | null {
   if (typeof value !== "string") {
     return null;
@@ -31,24 +29,12 @@ export class ProdutoQuimicoController {
   }
 
   async cadastrar(req: Request, res: Response) {
-    const { nome, formula } = req.body;
-
-    if (
-      typeof nome !== "string" ||
-      !nome.trim() ||
-      typeof formula !== "string" ||
-      !formula.trim()
-    ) {
-      return res.status(400).json({
-        erro: "Nome e fórmula são obrigatórios",
-      });
-    }
-
     try {
-      await this.cadastrarProdutoQuimico.execute(nome, formula);
+      const produtoCriado = await this.cadastrarProdutoQuimico.execute(req.body);
 
       return res.status(201).json({
         mensagem: "Produto químico cadastrado com sucesso",
+        produto: produtoCriado,
       });
     } catch (erro: any) {
       this.getLogger(req).error({ erro, body: req.body }, "Erro ao cadastrar produto químico");
@@ -102,17 +88,16 @@ export class ProdutoQuimicoController {
 
   async atualizar(req: Request, res: Response) {
     const id = parseId(req.params.id);
-    const { formula } = req.body;
 
-    if (id === null || typeof formula !== "string" || !formula.trim()) {
+    if (id === null) {
       return res.status(400).json({
-        erro: "Identificador e fórmula válida são obrigatórios",
+        erro: "Identificador inválido",
       });
     }
 
     try {
       const resultado = await this.atualizarProdutoQuimico.execute(
-        formula,
+        req.body,
         id,
       );
 
@@ -124,7 +109,7 @@ export class ProdutoQuimicoController {
 
       return res.status(200).json(resultado[0]);
     } catch (erro: any) {
-      this.getLogger(req).error({ erro, id, formula }, "Erro ao atualizar produto químico");
+      this.getLogger(req).error({ erro, id, body: req.body }, "Erro ao atualizar produto químico");
 
       return res.status(400).json({
         erro: erro.message || "Erro ao atualizar produto químico",

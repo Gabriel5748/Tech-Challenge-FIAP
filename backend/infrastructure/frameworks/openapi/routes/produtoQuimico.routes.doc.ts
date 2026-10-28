@@ -1,4 +1,4 @@
-import { registry, jsonContent, errorResponse, successMessageResponse, z } from "../registry";
+import { registry, jsonContent, errorResponse, z } from "../registry";
 import {
   ProdutoQuimicoSchema,
   NovoProdutoQuimicoSchema,
@@ -11,7 +11,7 @@ export function registerProdutoQuimicoRoutesDoc() {
     path: "/api/produtos-quimicos",
     tags: ["Produtos Químicos"],
     summary: "Cadastrar produto químico",
-    description: "Cadastra um novo produto químico informando seu nome e fórmula molecular.",
+    description: "Cadastra um novo produto químico informando obrigatoriamente nome e classe de risco.",
     request: {
       body: {
         content: {
@@ -22,8 +22,14 @@ export function registerProdutoQuimicoRoutesDoc() {
       },
     },
     responses: {
-      201: successMessageResponse("Produto químico cadastrado com sucesso"),
-      400: errorResponse("Nome e fórmula são obrigatórios"),
+      201: jsonContent(
+        z.object({
+          mensagem: z.string().openapi({ example: "Produto químico cadastrado com sucesso" }),
+          produto: ProdutoQuimicoSchema,
+        }),
+        "Produto químico cadastrado com sucesso"
+      ),
+      400: errorResponse("Campos obrigatórios ausentes ou status inválido"),
       500: errorResponse("Erro interno ao cadastrar produto químico"),
     },
   });
@@ -55,7 +61,7 @@ export function registerProdutoQuimicoRoutesDoc() {
       }),
     },
     responses: {
-      200: jsonContent(ProdutoQuimicoSchema, "Produto químico encontrado"),
+      200: jsonContent(ProdutoQuimicoSchema, "Produto químico encontrado com sucesso"),
       400: errorResponse("Identificador inválido"),
       404: errorResponse("Produto químico não encontrado"),
       500: errorResponse("Erro ao consultar produto químico"),
@@ -63,11 +69,11 @@ export function registerProdutoQuimicoRoutesDoc() {
   });
 
   registry.registerPath({
-    method: "patch",
+    method: "put",
     path: "/api/produtos-quimicos/{id}",
     tags: ["Produtos Químicos"],
-    summary: "Atualizar fórmula do produto químico",
-    description: "Atualiza a fórmula molecular de um produto químico cadastrado.",
+    summary: "Atualizar produto químico",
+    description: "Atualiza os dados de um produto químico cadastrado.",
     request: {
       params: z.object({
         id: z.coerce.number().int().openapi({
@@ -85,15 +91,15 @@ export function registerProdutoQuimicoRoutesDoc() {
     },
     responses: {
       200: jsonContent(ProdutoQuimicoSchema, "Produto químico atualizado com sucesso"),
-      400: errorResponse("Identificador e fórmula válida são obrigatórios"),
+      400: errorResponse("Dados inválidos para atualização"),
       404: errorResponse("Produto químico não encontrado"),
       500: errorResponse("Erro ao atualizar produto químico"),
     },
   });
 
   registry.registerPath({
-    method: "delete",
-    path: "/api/produtos-quimicos/{id}",
+    method: "patch",
+    path: "/api/produtos-quimicos/{id}/inativar",
     tags: ["Produtos Químicos"],
     summary: "Inativar produto químico",
     description: "Inativa o produto químico no catálogo portuário.",

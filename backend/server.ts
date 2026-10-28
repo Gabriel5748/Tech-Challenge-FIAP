@@ -18,20 +18,16 @@ const app = express();
 
 const openApiDoc = generateOpenApiDocument();
 
-// 1. Logger de requisições HTTP (pino-http)
 app.use(httpLogger);
 
-// 2. CORS
 app.use(
   cors({
     origin: settings.app.allowedHosts,
   }),
 );
 
-// 3. Parser JSON
 app.use(express.json());
 
-// Documentação Swagger UI
 app.use(
   "/api/docs",
   swaggerUI.serve,
@@ -54,18 +50,26 @@ app.get("/", (_req, res) => {
   });
 });
 
-// Rotas da aplicação
 app.use("/api/usuarios", routerUser);
-app.use("/api/grupos", grupoRouter);
-app.use("/api/cargas", cargaQuimicaRouter);
-app.use("/api/produtos-quimicos", produtoQuimicoRouter);
+app.use("/usuarios", routerUser);
 
-// Middleware global de tratamento e log de erros
+app.use("/api/grupos", grupoRouter);
+app.use("/grupos", grupoRouter);
+
+app.use("/api/cargas", cargaQuimicaRouter);
+app.use("/api/cargas-quimicas", cargaQuimicaRouter);
+app.use("/cargas-quimicas", cargaQuimicaRouter);
+app.use("/cargas", cargaQuimicaRouter);
+
+app.use("/api/produtos-quimicos", produtoQuimicoRouter);
+app.use("/produtos-quimicos", produtoQuimicoRouter);
+
 app.use(errorHandler);
 
 const server = app.listen(settings.app.port, settings.app.host, async () => {
   try {
     await sequelize.authenticate();
+    await sequelize.query('ALTER TABLE carga_quimica ADD COLUMN IF NOT EXISTS codigo VARCHAR(255);');
     logger.info("Banco de dados PostgreSQL conectado com sucesso via Sequelize!");
   } catch (err: any) {
     logger.error({ err }, "Falha ao conectar no banco de dados PostgreSQL!");
@@ -82,7 +86,6 @@ const server = app.listen(settings.app.port, settings.app.host, async () => {
   );
 });
 
-// Captura de exceções e rejeições não tratadas no processo
 process.on("uncaughtException", (err) => {
   logger.fatal({ err }, "Exceção não tratada capturada (uncaughtException)!");
   process.exit(1);

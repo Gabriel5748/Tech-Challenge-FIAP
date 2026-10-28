@@ -1,4 +1,5 @@
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
+import { validarTransicaoDeStatus } from "../../../src/domain/entities/statusCarga";
 
 export class BloquearCargaQuimica {
   constructor(private repository: ICargaQuimicaRepository) {}
@@ -11,11 +12,7 @@ export class BloquearCargaQuimica {
     }
 
     const carga = cargas[0];
-
-    // Regra: Carga cancelada não pode ser bloqueada
-    if (carga.status === "cancelado") {
-      throw new Error("Carga cancelada não pode sofrer alteração para bloqueada.");
-    }
+    validarTransicaoDeStatus(carga.status, "Bloqueada");
 
     return this.repository.bloquear(id);
   }

@@ -8,10 +8,12 @@ export class CargaQuimicaRepository implements ICargaQuimicaRepository {
       created = await CargaQuimicaModel.create({
         nome: dados,
         formula: formulaParam || "",
-        status: "pendente",
+        status: "Registrada",
+        dataEntrada: new Date(),
       });
     } else {
       created = await CargaQuimicaModel.create({
+        codigo: dados.codigo,
         nome: dados.nome,
         formula: dados.formula,
         produtoQuimicoId: dados.produtoQuimicoId,
@@ -21,7 +23,8 @@ export class CargaQuimicaRepository implements ICargaQuimicaRepository {
         destino: dados.destino,
         responsavelTecnico: dados.responsavelTecnico,
         documentacaoObrigatoria: dados.documentacaoObrigatoria,
-        status: dados.status || "pendente",
+        status: dados.status || "Registrada",
+        dataEntrada: dados.dataEntrada ? new Date(dados.dataEntrada) : new Date(),
       });
     }
     return created.toJSON();
@@ -84,14 +87,14 @@ export class CargaQuimicaRepository implements ICargaQuimicaRepository {
   }
 
   async bloquear(id: number): Promise<any[]> {
-    return this.atualizarStatus(id, "bloqueado");
+    return this.atualizarStatus(id, "Bloqueada");
   }
 
   async liberar(id: number): Promise<any[]> {
-    return this.atualizarStatus(id, "liberado");
+    return this.atualizarStatus(id, "Liberada");
   }
 
   async cancelar(id: number): Promise<any[]> {
-    return this.atualizarStatus(id, "cancelado");
+    return this.atualizarStatus(id, "Cancelada");
   }
 }

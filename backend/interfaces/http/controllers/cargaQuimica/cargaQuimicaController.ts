@@ -25,36 +25,8 @@ export class CargaQuimicaController {
   }
 
   async cadastrar(req: Request, res: Response) {
-    const {
-      nome,
-      formula,
-      produtoQuimicoId,
-      quantidade,
-      unidadeMedida,
-      origem,
-      destino,
-      responsavelTecnico,
-      documentacaoObrigatoria,
-    } = req.body;
-
-    if (typeof nome !== "string" || !nome.trim() || typeof formula !== "string" || !formula.trim()) {
-      return res.status(400).json({
-        erro: "Nome e fórmula da carga química são obrigatórios.",
-      });
-    }
-
     try {
-      const cargaCriada = await this.registrarCargaQuimica.execute({
-        nome: nome.trim(),
-        formula: formula.trim(),
-        produtoQuimicoId: produtoQuimicoId ? Number(produtoQuimicoId) : undefined,
-        quantidade: quantidade !== undefined ? Number(quantidade) : undefined,
-        unidadeMedida,
-        origem,
-        destino,
-        responsavelTecnico,
-        documentacaoObrigatoria,
-      });
+      const cargaCriada = await this.registrarCargaQuimica.execute(req.body);
 
       return res.status(201).json({
         mensagem: "Cadastro realizado com sucesso",
@@ -149,14 +121,8 @@ export class CargaQuimicaController {
   async atualizarStatus(req: Request, res: Response) {
     const id = Number(req.params.id);
     const { status } = req.body;
-    const statusPermitidos = ["bloqueado", "liberado", "cancelado", "pendente"];
 
-    if (
-      !Number.isInteger(id) ||
-      id <= 0 ||
-      typeof status !== "string" ||
-      !statusPermitidos.includes(status)
-    ) {
+    if (!Number.isInteger(id) || id <= 0 || typeof status !== "string") {
       return res.status(400).json({
         erro: "Identificador ou status inválido",
       });

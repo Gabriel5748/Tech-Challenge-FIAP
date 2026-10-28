@@ -1,4 +1,8 @@
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
+import {
+  possuiDocumentacaoObrigatoriaValida,
+  validarTransicaoDeStatus,
+} from "../../../src/domain/entities/statusCarga";
 
 export class LiberarCargaQuimica {
   constructor(private repository: ICargaQuimicaRepository) {}
@@ -11,23 +15,10 @@ export class LiberarCargaQuimica {
     }
 
     const carga = cargas[0];
+    validarTransicaoDeStatus(carga.status, "Liberada");
 
-    // Regra 4.20: Carga cancelada não pode ser liberada
-    if (carga.status === "cancelado") {
-      throw new Error("Carga cancelada não pode ser liberada (Regra 4.20).");
-    }
-
-    // Regra 4.4: Uma carga não pode ser liberada enquanto houver documentação obrigatória pendente ou não validada
-    if (carga.documentacaoObrigatoria && Array.isArray(carga.documentacaoObrigatoria)) {
-      const temDocumentoPendente = carga.documentacaoObrigatoria.some(
-        (doc: any) => typeof doc === "object" && doc.status && doc.status !== "validado"
-      );
-
-      if (temDocumentoPendente) {
-        throw new Error(
-          "Uma carga não pode ser liberada enquanto houver documentação obrigatória pendente ou não validada (Regra 4.4)."
-        );
-      }
+    if (!possuiDocumentacaoObrigatoriaValida(carga.documentacaoObrigatoria)) {
+      throw new Error("Uma carga não pode ser liberada sem documentação obrigatória.");
     }
 
     return this.repository.liberar(id);

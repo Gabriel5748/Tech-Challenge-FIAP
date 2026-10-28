@@ -1,4 +1,5 @@
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
+import { validarTransicaoDeStatus } from "../../../src/domain/entities/statusCarga";
 
 export class CancelarCargaQuimica {
   constructor(private repository: ICargaQuimicaRepository) {}
@@ -11,11 +12,7 @@ export class CancelarCargaQuimica {
     }
 
     const carga = cargas[0];
-
-    // Regra: Não cancelar carga que já foi cancelada
-    if (carga.status === "cancelado") {
-      throw new Error("Carga química já se encontra cancelada.");
-    }
+    validarTransicaoDeStatus(carga.status, "Cancelada");
 
     return this.repository.cancelar(id);
   }

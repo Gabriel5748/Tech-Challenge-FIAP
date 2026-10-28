@@ -1,9 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../infrastructure/frameworks/database';
 
-/* =========================================================
- * 1. USUÁRIO MODEL
- * ========================================================= */
 export interface UsuarioAttributes {
   id: string;
   nomeCompleto: string;
@@ -74,9 +71,6 @@ UsuarioModel.init(
   }
 );
 
-/* =========================================================
- * 2. GRUPO MODEL
- * ========================================================= */
 export interface GrupoAttributes {
   id: string;
   nome: string;
@@ -121,9 +115,6 @@ GrupoModel.init(
   }
 );
 
-/* =========================================================
- * 3. PERMISSÃO MODEL
- * ========================================================= */
 export interface PermissaoAttributes {
   id: string;
   nomePermissao: string;
@@ -169,9 +160,6 @@ PermissaoModel.init(
   }
 );
 
-/* =========================================================
- * 4. PIVOT: USUARIO_GRUPO MODEL
- * ========================================================= */
 export interface UsuarioGrupoAttributes {
   id: string;
   usuarioId: string;
@@ -223,9 +211,6 @@ UsuarioGrupoModel.init(
   }
 );
 
-/* =========================================================
- * 5. PIVOT: GRUPO_PERMISSAO MODEL
- * ========================================================= */
 export interface GrupoPermissaoAttributes {
   id: string;
   grupoId: string;
@@ -277,9 +262,6 @@ GrupoPermissaoModel.init(
   }
 );
 
-/* =========================================================
- * 6. PRODUTO QUÍMICO MODEL
- * ========================================================= */
 export interface ProdutoQuimicoAttributes {
   id: number;
   nome: string;
@@ -358,11 +340,9 @@ ProdutoQuimicoModel.init(
   }
 );
 
-/* =========================================================
- * 7. CARGA QUÍMICA MODEL
- * ========================================================= */
 export interface CargaQuimicaAttributes {
   id: number;
+  codigo?: string;
   nome: string;
   formula?: string;
   produtoQuimicoId?: number;
@@ -371,7 +351,7 @@ export interface CargaQuimicaAttributes {
   origem?: string;
   destino?: string;
   responsavelTecnico?: string;
-  documentacaoObrigatoria?: string[];
+  documentacaoObrigatoria?: any;
   status: string;
   dataEntrada?: Date;
   createdAt?: Date;
@@ -382,6 +362,7 @@ export interface CargaQuimicaCreationAttributes extends Optional<CargaQuimicaAtt
 
 export class CargaQuimicaModel extends Model<CargaQuimicaAttributes, CargaQuimicaCreationAttributes> implements CargaQuimicaAttributes {
   public id!: number;
+  public codigo?: string;
   public nome!: string;
   public formula?: string;
   public produtoQuimicoId?: number;
@@ -390,7 +371,7 @@ export class CargaQuimicaModel extends Model<CargaQuimicaAttributes, CargaQuimic
   public origem?: string;
   public destino?: string;
   public responsavelTecnico?: string;
-  public documentacaoObrigatoria?: string[];
+  public documentacaoObrigatoria?: any;
   public status!: string;
   public dataEntrada?: Date;
 
@@ -404,6 +385,10 @@ CargaQuimicaModel.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    codigo: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     nome: {
       type: DataTypes.STRING,
@@ -452,12 +437,13 @@ CargaQuimicaModel.init(
     status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'pendente',
+      defaultValue: 'Registrada',
     },
     dataEntrada: {
       type: DataTypes.DATE,
       allowNull: true,
       field: 'data_entrada',
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -469,9 +455,6 @@ CargaQuimicaModel.init(
   }
 );
 
-/* =========================================================
- * ASSOCIATIONS
- * ========================================================= */
 UsuarioModel.belongsToMany(GrupoModel, {
   through: UsuarioGrupoModel,
   foreignKey: 'usuarioId',

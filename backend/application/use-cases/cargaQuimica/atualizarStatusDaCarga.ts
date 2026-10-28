@@ -1,4 +1,8 @@
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
+import {
+  possuiDocumentacaoObrigatoriaValida,
+  validarTransicaoDeStatus,
+} from "../../../src/domain/entities/statusCarga";
 
 export class AtualizarStatusDaCarga {
   constructor(private repository: ICargaQuimicaRepository) {}
@@ -11,17 +15,15 @@ export class AtualizarStatusDaCarga {
     }
 
     const carga = cargas[0];
+    const novoStatus = validarTransicaoDeStatus(carga.status, status);
 
-    // Regra 4.20: Carga cancelada não pode ser liberada
-    if (carga.status === "cancelado" && status === "liberado") {
-      throw new Error("Carga cancelada não pode ser liberada (Regra 4.20).");
+    if (
+      novoStatus === "Liberada" &&
+      !possuiDocumentacaoObrigatoriaValida(carga.documentacaoObrigatoria)
+    ) {
+      throw new Error("Uma carga não pode ser liberada sem documentação obrigatória.");
     }
 
-    // Regra: Não permitir reabrir carga cancelada para outros status arbitrários
-    if (carga.status === "cancelado" && status !== "cancelado") {
-      throw new Error("Carga cancelada não pode ter seu status alterado.");
-    }
-
-    return this.repository.atualizarStatus(id, status);
+    return this.repository.atualizarStatus(id, novoStatus);
   }
 }

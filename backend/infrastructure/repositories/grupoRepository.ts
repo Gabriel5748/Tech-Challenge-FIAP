@@ -10,10 +10,6 @@ export class GrupoRepository implements IGrupoRepository {
       descricao: grupo.descricao,
     };
 
-    if (grupo.id && grupo.id.trim()) {
-      dados.id = grupo.id;
-    }
-
     const grupoModel = await GrupoModel.create(dados);
 
     const permissoes = grupo.getPermissoes();

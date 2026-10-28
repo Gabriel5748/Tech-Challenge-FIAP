@@ -108,10 +108,6 @@ export class UsuarioRepository implements IUsuarioRepository {
       status: usuario.status,
     };
 
-    if (usuario.id) {
-      dados.id = usuario.id;
-    }
-
     await UsuarioModel.create(dados);
   }
 

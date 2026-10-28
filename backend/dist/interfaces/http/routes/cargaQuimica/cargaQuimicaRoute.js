@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const container_1 = require("../../../../src/container");
+const router = (0, express_1.Router)();
+router.post("/", (req, res) => container_1.cargaQuimicaController.cadastrar(req, res));
+router.get("/", (req, res) => container_1.cargaQuimicaController.buscar(req, res));
+router.patch("/:id/status", (req, res) => container_1.cargaQuimicaController.atualizarStatus(req, res));
+router.get("/id", (req, res) => container_1.cargaQuimicaController.buscarPorIdentificador(req, res));
+router.patch("/:id/bloquear", (req, res) => container_1.cargaQuimicaController.bloquear(req, res));
+router.patch("/:id/liberar", (req, res) => container_1.cargaQuimicaController.liberar(req, res));
+router.patch("/:id/cancelar", (req, res) => container_1.cargaQuimicaController.cancelar(req, res));
+exports.default = router;

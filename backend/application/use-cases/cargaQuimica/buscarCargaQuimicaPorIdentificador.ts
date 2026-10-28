@@ -3,7 +3,7 @@ import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQu
 export class BuscarCargaQuimicaPorIdentificador {
   constructor(private repository: ICargaQuimicaRepository) {}
 
-  async execute(nome: string) {
-    return this.repository.buscarPorIdentificador(nome);
+  async execute(identificador: string | number) {
+    return this.repository.buscarPorIdentificador(identificador);
   }
 }

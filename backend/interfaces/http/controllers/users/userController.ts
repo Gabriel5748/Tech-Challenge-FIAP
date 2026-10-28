@@ -3,6 +3,7 @@ import { IUsuarioRepository } from '../../../../src/domain/interfaces/usuarioRep
 import { IGrupoRepository } from '../../../../src/domain/interfaces/grupoRepository';
 import { Usuario } from '../../../../src/domain/entities/usuarios';
 import { AtribuirUsuarioGrupoUseCase } from '../../../../application/use-cases/AtribuirUsuarioGrupo';
+import { logger } from '../../../../infrastructure/logger';
 
 export class UserController {
   constructor(
@@ -11,10 +12,15 @@ export class UserController {
     private readonly atribuirUsuarioGrupoUseCase?: AtribuirUsuarioGrupoUseCase
   ) {}
 
+  private getLogger(req: Request) {
+    return (req as any).log || logger;
+  }
+
   // POST /api/usuarios - Cadastrar novo usuário
+  // Grupos são vinculados separadamente via POST /api/usuarios/:id/grupos
   async cadastrar(req: Request, res: Response): Promise<Response> {
     try {
-      const { nomeCompleto, email, dataDeContratacao, periodoTurno, status, gruposIds } = req.body;
+      const { nomeCompleto, email, dataDeContratacao, periodoTurno, status } = req.body;
 
       // Validação de campos obrigatórios
       if (!nomeCompleto || typeof nomeCompleto !== 'string' || nomeCompleto.trim() === '') {
@@ -40,40 +46,34 @@ export class UserController {
 
       const statusUsuario = status === 'inativo' ? 'inativo' : 'ativo';
 
-      // Verificar unicidade de e-mail
+      // Regra 4.1: Unicidade de credencial/e-mail
       const emailExistente = await this.usuarioRepository.buscarPorEmail(email.trim());
       if (emailExistente) {
-        return res.status(409).json({ erro: 'Já existe um usuário cadastrado com este e-mail.' });
+        return res.status(409).json({ erro: 'Já existe um usuário cadastrado com este e-mail (Regra 4.1).' });
       }
 
-      // Buscar grupos vinculados se fornecidos
-      let gruposDomain: any[] = [];
-      if (Array.isArray(gruposIds) && gruposIds.length > 0 && this.grupoRepository) {
-        gruposDomain = await this.grupoRepository.listarPorIds(gruposIds);
-      }
-
-      // Criar entidade de domínio Usuario (id gerado pelo banco ou crypto)
+      // Cria o usuário sem grupos — vínculos são gerenciados pela tabela intermediária
+      // via POST /api/usuarios/:id/grupos
       const novoUsuario = new Usuario(
-        '', // id gerado automaticamente pelo Sequelize (UUIDV4)
+        '',
         nomeCompleto.trim(),
         email.trim().toLowerCase(),
         dataContratacaoParsed,
         periodoTurno.trim(),
         statusUsuario,
-        gruposDomain
       );
 
       await this.usuarioRepository.salvar(novoUsuario);
 
-      // Buscar o usuário recém-criado para retornar dados completos
+      // Busca o usuário recém-criado para retornar com o ID gerado
       const usuarioCriado = await this.usuarioRepository.buscarPorEmail(email.trim().toLowerCase());
 
       return res.status(201).json({
         mensagem: 'Usuário cadastrado com sucesso.',
-        usuario: usuarioCriado || novoUsuario,
+        usuario: usuarioCriado,
       });
     } catch (error: any) {
-      console.error('Erro ao cadastrar usuário:', error);
+      this.getLogger(req).error({ error, body: req.body }, 'Erro ao cadastrar usuário');
       return res.status(500).json({
         erro: 'Erro interno ao cadastrar usuário',
         detalhes: error.message,
@@ -87,7 +87,7 @@ export class UserController {
       const usuarios = await this.usuarioRepository.listarTodos();
       return res.status(200).json(usuarios);
     } catch (error: any) {
-      console.error('Erro ao listar usuários:', error);
+      this.getLogger(req).error({ error }, 'Erro ao listar usuários');
       return res.status(500).json({
         erro: 'Erro interno ao listar usuários',
         detalhes: error.message,
@@ -122,7 +122,7 @@ export class UserController {
 
       return res.status(200).json(usuario);
     } catch (error: any) {
-      console.error('Erro ao buscar usuário por ID:', error);
+      this.getLogger(req).error({ error, id: req.params.id }, 'Erro ao buscar usuário por ID');
       return res.status(500).json({
         erro: 'Erro ao buscar usuário',
         detalhes: error.message,
@@ -130,11 +130,11 @@ export class UserController {
     }
   }
 
-  // PUT /api/usuarios/:id - Atualizar dados do usuário
+  // PUT /api/usuarios/:id - Atualizar dados do usuário (sem alterar grupos)
   async atualizar(req: Request, res: Response): Promise<Response> {
     try {
       const id = String(req.params.id);
-      const { nomeCompleto, email, dataDeContratacao, periodoTurno, status, gruposIds } = req.body;
+      const { nomeCompleto, email, dataDeContratacao, periodoTurno, status } = req.body;
 
       if (!id || id === 'undefined') {
         return res.status(400).json({ erro: 'ID do usuário inválido.' });
@@ -153,16 +153,11 @@ export class UserController {
         }
       }
 
-      // Buscar grupos vinculados se fornecidos
-      let gruposDomain = usuarioExistente.getGrupos();
-      if (Array.isArray(gruposIds) && this.grupoRepository) {
-        gruposDomain = await this.grupoRepository.listarPorIds(gruposIds);
-      }
-
       const dataContratacaoParsed = dataDeContratacao
         ? new Date(dataDeContratacao)
         : usuarioExistente.dataDeContratacao;
 
+      // Mantém os grupos existentes — vínculos gerenciados pela tabela intermediária
       const usuarioAtualizado = new Usuario(
         id,
         nomeCompleto ? nomeCompleto.trim() : usuarioExistente.nomeCompleto,
@@ -170,7 +165,7 @@ export class UserController {
         dataContratacaoParsed,
         periodoTurno ? periodoTurno.trim() : usuarioExistente.periodoTurno,
         status === 'ativo' || status === 'inativo' ? status : usuarioExistente.status,
-        gruposDomain
+        usuarioExistente.getGrupos(),
       );
 
       await this.usuarioRepository.atualizar(usuarioAtualizado);
@@ -179,10 +174,10 @@ export class UserController {
 
       return res.status(200).json({
         mensagem: 'Usuário atualizado com sucesso.',
-        usuario: resultadoFinal || usuarioAtualizado,
+        usuario: resultadoFinal,
       });
     } catch (error: any) {
-      console.error('Erro ao atualizar usuário:', error);
+      this.getLogger(req).error({ error, id: req.params.id, body: req.body }, 'Erro ao atualizar usuário');
       return res.status(500).json({
         erro: 'Erro ao atualizar usuário',
         detalhes: error.message,
@@ -207,7 +202,7 @@ export class UserController {
       await this.usuarioRepository.deletar(id);
       return res.status(204).send();
     } catch (error: any) {
-      console.error('Erro ao deletar usuário:', error);
+      this.getLogger(req).error({ error, id: req.params.id }, 'Erro ao deletar usuário');
       return res.status(500).json({
         erro: 'Erro ao deletar usuário',
         detalhes: error.message,
@@ -215,7 +210,7 @@ export class UserController {
     }
   }
 
-  // POST /api/usuarios/:id/grupos - Atribuir grupo ao usuário
+  // POST /api/usuarios/:id/grupos - Atribuir grupo ao usuário via tabela intermediária
   async atribuirGrupo(req: Request, res: Response): Promise<Response> {
     try {
       const id = String(req.params.id);
@@ -245,7 +240,7 @@ export class UserController {
 
       return res.status(200).json({ mensagem: 'Grupo atribuído com sucesso ao usuário.' });
     } catch (error: any) {
-      console.error('Erro ao atribuir grupo:', error);
+      this.getLogger(req).error({ error, id: req.params.id, body: req.body }, 'Erro ao atribuir grupo');
       return res.status(400).json({
         erro: 'Erro ao atribuir grupo ao usuário',
         detalhes: error.message,

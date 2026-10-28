@@ -5,11 +5,12 @@ import { Permissoes } from "../../src/domain/entities/permissoes";
 
 export class GrupoRepository implements IGrupoRepository {
   async salvar(grupo: Grupos): Promise<void> {
-    const grupoModel = await GrupoModel.create({
-      id: grupo.id,
+    const dados: any = {
       nome: grupo.nome,
       descricao: grupo.descricao,
-    });
+    };
+
+    const grupoModel = await GrupoModel.create(dados);
 
     const permissoes = grupo.getPermissoes();
     if (permissoes.length > 0) {
@@ -29,7 +30,7 @@ export class GrupoRepository implements IGrupoRepository {
 
     if (!registro) return null;
 
-    const permissoesDomain = (registro as any).permissoes.map(
+    const permissoesDomain = ((registro as any).permissoes || []).map(
       (p: any) => new Permissoes(p.id, p.nomePermissao, p.descricao)
     );
 
@@ -55,7 +56,7 @@ export class GrupoRepository implements IGrupoRepository {
     });
 
     return registros.map((registro: any) => {
-      const permissoesDomain = registro.permissoes.map(
+      const permissoesDomain = (registro.permissoes || []).map(
         (p: any) => new Permissoes(p.id, p.nomePermissao, p.descricao)
       );
 
@@ -79,7 +80,7 @@ export class GrupoRepository implements IGrupoRepository {
     });
 
     return registros.map((registro: any) => {
-      const permissoesDomain = registro.permissoes.map(
+      const permissoesDomain = (registro.permissoes || []).map(
         (p: any) => new Permissoes(p.id, p.nomePermissao, p.descricao)
       );
 

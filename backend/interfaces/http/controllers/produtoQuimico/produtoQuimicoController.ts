@@ -4,6 +4,7 @@ import { BuscarProdutoQuimicoPorIdentificador } from "../../../../application/us
 import { CadastrarProdutoQuimico } from "../../../../application/use-cases/produtoQuimico/cadastrarProdutoQuimico";
 import { InativarProdutoQuimico } from "../../../../application/use-cases/produtoQuimico/inativarProdutoQuimico";
 import { ListarProdutosQuimicos } from "../../../../application/use-cases/produtoQuimico/listarProdutoQuimico";
+import { logger } from "../../../../infrastructure/logger";
 
 function parseId(value: unknown): number | null {
   if (typeof value !== "string") {
@@ -23,31 +24,23 @@ export class ProdutoQuimicoController {
     private inativarProdutoQuimico: InativarProdutoQuimico,
   ) {}
 
+  private getLogger(req: Request) {
+    return (req as any).log || logger;
+  }
+
   async cadastrar(req: Request, res: Response) {
-    const { nome, formula } = req.body;
-
-    if (
-      typeof nome !== "string" ||
-      !nome.trim() ||
-      typeof formula !== "string" ||
-      !formula.trim()
-    ) {
-      return res.status(400).json({
-        erro: "Nome e fórmula são obrigatórios",
-      });
-    }
-
     try {
-      await this.cadastrarProdutoQuimico.execute(nome, formula);
+      const produtoCriado = await this.cadastrarProdutoQuimico.execute(req.body);
 
       return res.status(201).json({
         mensagem: "Produto químico cadastrado com sucesso",
+        produto: produtoCriado,
       });
-    } catch (erro) {
-      console.error(erro);
+    } catch (erro: any) {
+      this.getLogger(req).error({ erro, body: req.body }, "Erro ao cadastrar produto químico");
 
-      return res.status(500).json({
-        erro: "Erro ao cadastrar produto químico",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao cadastrar produto químico",
       });
     }
   }
@@ -56,8 +49,8 @@ export class ProdutoQuimicoController {
     try {
       const resultado = await this.listarProdutosQuimicos.execute();
       return res.status(200).json(resultado);
-    } catch (erro) {
-      console.error(erro);
+    } catch (erro: any) {
+      this.getLogger(req).error({ erro }, "Erro ao listar produtos químicos");
 
       return res.status(500).json({
         erro: "Erro ao listar produtos químicos",
@@ -84,28 +77,27 @@ export class ProdutoQuimicoController {
       }
 
       return res.status(200).json(resultado[0]);
-    } catch (erro) {
-      console.error(erro);
+    } catch (erro: any) {
+      this.getLogger(req).error({ erro, id }, "Erro ao consultar produto químico");
 
-      return res.status(500).json({
-        erro: "Erro ao consultar produto químico",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao consultar produto químico",
       });
     }
   }
 
   async atualizar(req: Request, res: Response) {
     const id = parseId(req.params.id);
-    const { formula } = req.body;
 
-    if (id === null || typeof formula !== "string" || !formula.trim()) {
+    if (id === null) {
       return res.status(400).json({
-        erro: "Identificador e fórmula válida são obrigatórios",
+        erro: "Identificador inválido",
       });
     }
 
     try {
       const resultado = await this.atualizarProdutoQuimico.execute(
-        formula,
+        req.body,
         id,
       );
 
@@ -116,11 +108,11 @@ export class ProdutoQuimicoController {
       }
 
       return res.status(200).json(resultado[0]);
-    } catch (erro) {
-      console.error(erro);
+    } catch (erro: any) {
+      this.getLogger(req).error({ erro, id, body: req.body }, "Erro ao atualizar produto químico");
 
-      return res.status(500).json({
-        erro: "Erro ao atualizar produto químico",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao atualizar produto químico",
       });
     }
   }
@@ -144,11 +136,11 @@ export class ProdutoQuimicoController {
       }
 
       return res.status(200).json(resultado[0]);
-    } catch (erro) {
-      console.error(erro);
+    } catch (erro: any) {
+      this.getLogger(req).error({ erro, id }, "Erro ao inativar produto químico");
 
-      return res.status(500).json({
-        erro: "Erro ao inativar produto químico",
+      return res.status(400).json({
+        erro: erro.message || "Erro ao inativar produto químico",
       });
     }
   }

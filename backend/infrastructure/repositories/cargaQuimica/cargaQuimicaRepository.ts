@@ -1,60 +1,100 @@
 import { ICargaQuimicaRepository } from "../../../src/domain/interfaces/iCargaQuimicaRepository";
-import { pool } from "../../database/database";
+import { CargaQuimicaModel, ProdutoQuimicoModel } from "../../../src/core/models";
 
 export class CargaQuimicaRepository implements ICargaQuimicaRepository {
-  async registrar(nome: string, formula: string) {
-    await pool.query(
-      `INSERT INTO carga_quimica (nome, formula)
-       VALUES ($1, $2)`,
-      [nome, formula],
-    );
+  async registrar(dados: any, formulaParam?: string): Promise<any> {
+    let created;
+    if (typeof dados === "string") {
+      created = await CargaQuimicaModel.create({
+        nome: dados,
+        formula: formulaParam || "",
+        status: "Registrada",
+        dataEntrada: new Date(),
+      });
+    } else {
+      created = await CargaQuimicaModel.create({
+        codigo: dados.codigo,
+        nome: dados.nome,
+        formula: dados.formula,
+        produtoQuimicoId: dados.produtoQuimicoId,
+        quantidade: dados.quantidade,
+        unidadeMedida: dados.unidadeMedida,
+        origem: dados.origem,
+        destino: dados.destino,
+        responsavelTecnico: dados.responsavelTecnico,
+        documentacaoObrigatoria: dados.documentacaoObrigatoria,
+        status: dados.status || "Registrada",
+        dataEntrada: dados.dataEntrada ? new Date(dados.dataEntrada) : new Date(),
+      });
+    }
+    return created.toJSON();
   }
 
-  async buscarPorIdentificador(nome: string) {
-    const resultado = await pool.query(
-      `SELECT nome, formula FROM carga_quimica WHERE nome = $1`,
-      [nome],
-    );
-    return resultado.rows;
+  async buscarPorIdentificador(identificador: string | number): Promise<any[]> {
+    const isId =
+      typeof identificador === "number" ||
+      (!isNaN(Number(identificador)) &&
+        String(Number(identificador)) === String(identificador).trim());
+
+    const where = isId
+      ? { id: Number(identificador) }
+      : { nome: String(identificador) };
+
+    const registros = await CargaQuimicaModel.findAll({
+      where,
+      include: [
+        {
+          model: ProdutoQuimicoModel,
+          as: "produtoQuimico",
+        },
+      ],
+    });
+
+    return registros.map((r) => r.toJSON());
   }
 
-  async listar() {
-    const resultado = await pool.query(
-      `SELECT nome, formula FROM carga_quimica`,
-      [],
-    );
-    return resultado.rows;
+  async listar(): Promise<any[]> {
+    const registros = await CargaQuimicaModel.findAll({
+      include: [
+        {
+          model: ProdutoQuimicoModel,
+          as: "produtoQuimico",
+        },
+      ],
+    });
+    return registros.map((r) => r.toJSON());
   }
 
-  async atualizarStatus(id: number, status: string) {
-    const resultado = await pool.query(
-      `UPDATE carga_quimica SET status = $1 WHERE id = $2 RETURNING *`,
-      [status, id],
+  async atualizarStatus(id: number, status: string): Promise<any[]> {
+    const [afetados] = await CargaQuimicaModel.update(
+      { status },
+      { where: { id } }
     );
-    return resultado.rows;
+
+    if (afetados === 0) {
+      return [];
+    }
+
+    const atualizado = await CargaQuimicaModel.findByPk(id, {
+      include: [
+        {
+          model: ProdutoQuimicoModel,
+          as: "produtoQuimico",
+        },
+      ],
+    });
+    return atualizado ? [atualizado.toJSON()] : [];
   }
 
-  async bloquear(id: number) {
-    const resultado = await pool.query(
-      `update carga_quimica set status = 'bloqueado' WHERE id = $1`,
-      [id],
-    );
-    return resultado.rows;
+  async bloquear(id: number): Promise<any[]> {
+    return this.atualizarStatus(id, "Bloqueada");
   }
 
-  async liberar(id: number) {
-    const resultado = await pool.query(
-      `update carga_quimica set status = 'liberado' WHERE id = $1`,
-      [id],
-    );
-    return resultado.rows;
+  async liberar(id: number): Promise<any[]> {
+    return this.atualizarStatus(id, "Liberada");
   }
 
-  async cancelar(id: number) {
-    const resultado = await pool.query(
-      `update carga_quimica set status = 'cancelado' WHERE id = $1`,
-      [id],
-    );
-    return resultado.rows;
+  async cancelar(id: number): Promise<any[]> {
+    return this.atualizarStatus(id, "Cancelada");
   }
 }

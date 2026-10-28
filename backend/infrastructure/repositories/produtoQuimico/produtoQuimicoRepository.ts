@@ -1,41 +1,83 @@
 import { IProdutoQuimicoRepository } from "../../../src/domain/interfaces/IProdutoQuimicoRepository";
-import { pool } from "../../database/database";
+import { ProdutoQuimicoModel } from "../../../src/core/models";
 
 export class ProdutoQuimicoRepository implements IProdutoQuimicoRepository {
-  async criar(nome: string, formula: string) {
-    await pool.query(
-      `INSERT INTO produto_quimico (nome, formula)
-       VALUES ($1, $2)`,
-      [nome, formula],
-    );
+  async criar(dados: any, formulaParam?: string): Promise<any> {
+    let created;
+    if (typeof dados === "string") {
+      created = await ProdutoQuimicoModel.create({
+        nome: dados,
+        formula: formulaParam || "",
+        ativo: true,
+      });
+    } else {
+      created = await ProdutoQuimicoModel.create({
+        nome: dados.nome,
+        formula: dados.formula,
+        descricao: dados.descricao,
+        numeroONU: dados.numeroONU ?? dados.numero_onu,
+        classeRisco: dados.classeRisco ?? dados.classe_risco,
+        grupoCompatibilidade: dados.grupoCompatibilidade ?? dados.grupo_compatibilidade,
+        ativo: dados.ativo !== undefined ? dados.ativo : true,
+      });
+    }
+    return created.toJSON();
   }
 
-  async buscarPorIdentificador(id: number) {
-    const resultado = await pool.query(
-      `SELECT * FROM produto_quimico WHERE id = $1`,
-      [id],
-    );
-    return resultado.rows;
+  async buscarPorIdentificador(id: number): Promise<any[]> {
+    const registro = await ProdutoQuimicoModel.findByPk(id);
+    return registro ? [registro.toJSON()] : [];
   }
 
-  async listar() {
-    const resultado = await pool.query(`SELECT * FROM produto_quimico`, []);
-    return resultado.rows;
+  async listar(): Promise<any[]> {
+    const registros = await ProdutoQuimicoModel.findAll();
+    return registros.map((r) => r.toJSON());
   }
 
-  async atualizar(formula: string, id: number) {
-    const resultado = await pool.query(
-      `UPDATE produto_quimico SET formula = $1 WHERE id = $2 RETURNING *`,
-      [formula, id],
-    );
-    return resultado.rows;
+  async atualizar(dados: any, id: number): Promise<any[]> {
+    let updateData: any = {};
+
+    if (typeof dados === "string") {
+      updateData = { formula: dados };
+    } else {
+      if (dados.nome !== undefined) updateData.nome = dados.nome;
+      if (dados.formula !== undefined) updateData.formula = dados.formula;
+      if (dados.descricao !== undefined) updateData.descricao = dados.descricao;
+      if (dados.numeroONU !== undefined || dados.numero_onu !== undefined) {
+        updateData.numeroONU = dados.numeroONU ?? dados.numero_onu;
+      }
+      if (dados.classeRisco !== undefined || dados.classe_risco !== undefined) {
+        updateData.classeRisco = dados.classeRisco ?? dados.classe_risco;
+      }
+      if (dados.grupoCompatibilidade !== undefined || dados.grupo_compatibilidade !== undefined) {
+        updateData.grupoCompatibilidade = dados.grupoCompatibilidade ?? dados.grupo_compatibilidade;
+      }
+      if (dados.ativo !== undefined) updateData.ativo = dados.ativo;
+    }
+
+    const [afetados] = await ProdutoQuimicoModel.update(updateData, {
+      where: { id },
+    });
+
+    if (afetados === 0) {
+      return [];
+    }
+
+    const atualizado = await ProdutoQuimicoModel.findByPk(id);
+    return atualizado ? [atualizado.toJSON()] : [];
   }
 
-  async inativar(id: number) {
-    const resultado = await pool.query(
-      `UPDATE produto_quimico SET ativo = false WHERE id = $1 RETURNING *`,
-      [id],
+  async inativar(id: number): Promise<any[]> {
+    const [afetados] = await ProdutoQuimicoModel.update(
+      { ativo: false },
+      { where: { id } }
     );
-    return resultado.rows;
+
+    if (afetados === 0) {
+      return [];
+    }
+
+    const inativado = await ProdutoQuimicoModel.findByPk(id);
+    return inativado ? [inativado.toJSON()] : [];
   }
 }

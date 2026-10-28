@@ -1,5 +1,5 @@
-// src/infrastructure/frameworks/database.ts
 import { Sequelize } from 'sequelize';
+import { logger } from '../logger';
 import { settings } from './settings';
 
 export const sequelize = new Sequelize(
@@ -10,7 +10,11 @@ export const sequelize = new Sequelize(
     host: settings.database.host,
     port: settings.database.port,
     dialect: 'postgres',
-    logging: false,
+    logging: settings.logger.dbLogging
+      ? (sql: string, timing?: number) => {
+          logger.debug({ sql, timing }, 'Sequelize Query');
+        }
+      : false,
   }
 );
 

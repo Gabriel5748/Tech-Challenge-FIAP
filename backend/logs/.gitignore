@@ -1,0 +1,5 @@
+# Ignora todos os arquivos de log
+*.log
+
+# Mantém este arquivo no git para versionar a pasta
+!.gitignore

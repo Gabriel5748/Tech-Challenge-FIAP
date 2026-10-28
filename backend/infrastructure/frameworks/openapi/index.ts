@@ -46,7 +46,11 @@ export function generateOpenApiDocument() {
       },
       {
         name: "Usuários",
-        description: "Gerenciamento e controle de usuários e grupos",
+        description: "Gerenciamento e controle de usuários",
+      },
+      {
+        name: "Grupos",
+        description: "Gerenciamento de grupos de acesso e permissões",
       },
       {
         name: "Cargas Químicas",

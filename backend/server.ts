@@ -2,10 +2,15 @@ import cors from "cors";
 import express from "express";
 import swaggerUI from "swagger-ui-express";
 
+import { sequelize } from "./infrastructure/frameworks/database";
 import { generateOpenApiDocument } from "./infrastructure/frameworks/openapi";
 import { settings } from "./infrastructure/frameworks/settings";
+import { logger } from "./infrastructure/logger";
 
+import errorHandler from "./interfaces/http/middlewares/errorHandler";
+import httpLogger from "./interfaces/http/middlewares/httpLogger";
 import cargaQuimicaRouter from "./interfaces/http/routers/cargaQuimica/cargaQuimicaRoute";
+import grupoRouter from "./interfaces/http/routers/grupos/grupos";
 import produtoQuimicoRouter from "./interfaces/http/routers/produtoQuimico/produtoQuimicoRoute";
 import routerUser from "./interfaces/http/routers/users/users";
 
@@ -13,17 +18,16 @@ const app = express();
 
 const openApiDoc = generateOpenApiDocument();
 
-// CORS
+app.use(httpLogger);
+
 app.use(
   cors({
     origin: settings.app.allowedHosts,
   }),
 );
 
-// Middleware
 app.use(express.json());
 
-// Documentação Swagger UI
 app.use(
   "/api/docs",
   swaggerUI.serve,
@@ -46,20 +50,52 @@ app.get("/", (_req, res) => {
   });
 });
 
-// Rotas da aplicação
 app.use("/api/usuarios", routerUser);
-app.use("/api/cargas", cargaQuimicaRouter);
-app.use("/api/produtos-quimicos", produtoQuimicoRouter);
+app.use("/usuarios", routerUser);
 
-app.listen(settings.app.port, settings.app.host, () => {
-  console.log(
+app.use("/api/grupos", grupoRouter);
+app.use("/grupos", grupoRouter);
+
+app.use("/api/cargas", cargaQuimicaRouter);
+app.use("/api/cargas-quimicas", cargaQuimicaRouter);
+app.use("/cargas-quimicas", cargaQuimicaRouter);
+app.use("/cargas", cargaQuimicaRouter);
+
+app.use("/api/produtos-quimicos", produtoQuimicoRouter);
+app.use("/produtos-quimicos", produtoQuimicoRouter);
+
+app.use(errorHandler);
+
+const server = app.listen(settings.app.port, settings.app.host, async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.query('ALTER TABLE carga_quimica ADD COLUMN IF NOT EXISTS codigo VARCHAR(255);');
+    logger.info("Banco de dados PostgreSQL conectado com sucesso via Sequelize!");
+  } catch (err: any) {
+    logger.error({ err }, "Falha ao conectar no banco de dados PostgreSQL!");
+  }
+
+  logger.info(
     `Servidor rodando em http://${settings.app.host}:${settings.app.port}`,
   );
-
-  console.log(
+  logger.info(
     `Documentação Swagger: http://${settings.app.host}:${settings.app.port}/api/docs`,
   );
-  console.log(
+  logger.info(
     `Especificação JSON: http://${settings.app.host}:${settings.app.port}/api/docs.json`,
   );
 });
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "Exceção não tratada capturada (uncaughtException)!");
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error(
+    { reason },
+    "Promessa rejeitada não tratada (unhandledRejection)!",
+  );
+});
+
+export default app;

@@ -1,5 +1,7 @@
 import { registry, jsonContent, errorResponse, successMessageResponse, z } from "../registry";
 import {
+  GrupoSchema,
+  NovoGrupoSchema,
   UsuarioSchema,
   NovoUsuarioSchema,
   AtualizarUsuarioSchema,
@@ -7,6 +9,67 @@ import {
 } from "../schemas";
 
 export function registerUsuarioRoutesDoc() {
+  registry.registerPath({
+    method: "get",
+    path: "/api/grupos",
+    tags: ["Grupos"],
+    summary: "Listar todos os grupos",
+    description: "Retorna a listagem de todos os grupos de permissões registrados no sistema.",
+    responses: {
+      200: jsonContent(z.array(GrupoSchema), "Lista de grupos obtida com sucesso"),
+      500: errorResponse("Erro interno ao listar grupos"),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/api/grupos/{id}",
+    tags: ["Grupos"],
+    summary: "Buscar grupo por ID",
+    description: "Obtém os detalhes de um grupo pelo seu identificador único (UUID).",
+    request: {
+      params: z.object({
+        id: z.string().openapi({
+          description: "Identificador UUID do grupo",
+          example: "b1a7d6e4-3209-4ce1-8fa1-7f9cb814041b",
+        }),
+      }),
+    },
+    responses: {
+      200: jsonContent(GrupoSchema, "Grupo encontrado com sucesso"),
+      400: errorResponse("ID do grupo não informado"),
+      404: errorResponse("Grupo não encontrado"),
+      500: errorResponse("Erro interno ao buscar grupo"),
+    },
+  });
+
+  registry.registerPath({
+    method: "post",
+    path: "/api/grupos",
+    tags: ["Grupos"],
+    summary: "Cadastrar novo grupo",
+    description: "Registra um novo grupo de acesso/permissões no sistema.",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: NovoGrupoSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: jsonContent(
+        z.object({
+          mensagem: z.string().openapi({ example: "Grupo cadastrado com sucesso." }),
+          grupo: GrupoSchema,
+        }),
+        "Grupo cadastrado com sucesso"
+      ),
+      400: errorResponse("O nome do grupo é obrigatório"),
+    },
+  });
+
   registry.registerPath({
     method: "get",
     path: "/api/usuarios",

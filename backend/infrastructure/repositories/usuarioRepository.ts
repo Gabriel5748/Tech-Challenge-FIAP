@@ -108,16 +108,7 @@ export class UsuarioRepository implements IUsuarioRepository {
       status: usuario.status,
     };
 
-    if (usuario.id) {
-      dados.id = usuario.id;
-    }
-
-    const usuarioModel = await UsuarioModel.create(dados);
-
-    const grupos = usuario.getGrupos();
-    if (grupos.length > 0) {
-      await (usuarioModel as any).setGrupos(grupos.map((g) => g.id));
-    }
+    await UsuarioModel.create(dados);
   }
 
   async atualizar(usuario: Usuario): Promise<void> {
@@ -133,12 +124,14 @@ export class UsuarioRepository implements IUsuarioRepository {
         where: { id: usuario.id },
       }
     );
+  }
 
-    const usuarioModel = await UsuarioModel.findByPk(usuario.id);
-    if (usuarioModel) {
-      const gruposIds = usuario.getGrupos().map((g) => g.id);
-      await (usuarioModel as any).setGrupos(gruposIds);
+  async adicionarGrupo(usuarioId: string, grupoId: string): Promise<void> {
+    const usuarioModel = await UsuarioModel.findByPk(usuarioId);
+    if (!usuarioModel) {
+      throw new Error('Usuário não encontrado.');
     }
+    await (usuarioModel as any).addGrupo(grupoId);
   }
 
   async deletar(id: string): Promise<void> {

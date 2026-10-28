@@ -7,7 +7,7 @@ export const settings = {
   app: {
     host: process.env.API_HOST || '',
     port: process.env.API_PORT ? Number(process.env.API_PORT) : 3000,
-    nodeEnv: process.env.NODE_ENV || '',
+    nodeEnv: process.env.NODE_ENV || 'development',
     allowedHosts: process.env.ALLOWED_HOSTS || '',
   },
   database: {
@@ -17,4 +17,10 @@ export const settings = {
     user: process.env.DB_USER || '',
     pass: process.env.DB_PASSWORD || '',
   },
+  logger: {
+    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+    dir: process.env.LOG_DIR || 'logs',
+    dbLogging: process.env.LOG_DB_QUERIES === 'true',
+  },
 };
+export default settings;

@@ -13,7 +13,7 @@ export const settings = {
   database: {
     host: process.env.DB_HOST || '',
     port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
-    name: process.env.DB_NAME || '',
+    name: (process.env.NODE_ENV === 'test' ? process.env.DB_NAME_TEST : process.env.DB_NAME) || '',
     user: process.env.DB_USER || '',
     pass: process.env.DB_PASSWORD || '',
   },

@@ -1,31 +1,132 @@
-# QuimiPort
+# QuimiPort - Tech Challenge FIAP (Fase 2)
 
-## Contexto do problema
+Sistema de Gerenciamento e Controle de Cargas Químicas e Produtos Perigosos em Ambiente Portuário.
 
-QuimiPort é uma solução técnica para o controle de cargas químicas em ambiente portuário. O problema identificado é a gestão descentralizada e manual dessas cargas, que causa falta de rastreabilidade, dificulta a validação de documentação e aumenta o risco de liberação indevida de materiais perigosos.
+---
 
-## Objetivo da aplicação
+## Sumário da Entrega - Fase 2
 
-A aplicação tem como objetivo modelar o domínio central de um sistema de gerenciamento de cargas químicas, preservando as regras de negócio principais, os casos de uso e a arquitetura proposta para evoluir no futuro em uma aplicação completa.
+Nesta segunda fase do Tech Challenge, o planejamento conceitual da Fase 1 foi transformado em uma **API backend funcional completa** desenvolvida em **Node.js** com **TypeScript**, banco relacional **PostgreSQL**, containerização com **Docker**, testes automatizados e pipeline de integração contínua com **GitHub Actions**.
 
-## O que este repositório entrega nesta fase
+---
 
-- Modelagem do domínio usando conceitos de DDD.
-- Estrutura inicial de Clean Architecture com camadas de entidades, casos de uso e contratos.
-- Documentação técnica de domínio, casos de uso e arquitetura.
+## 1. Contexto e Solução
 
-## Estrutura do repositório
+O **QuimiPort** informatiza as operações de entrada, triagem, inspeção, liberação, movimentação e cancelamento de cargas químicas no ambiente portuário (inspirado nas operações do Porto de Santos).
 
-- `frontend/` — código do domínio e contratos da aplicação.
-- `README.md` — documentação principal do projeto.
-- `docs/` — documentação técnica detalhada.
+Principais capacidades implementadas:
+- Cadastro e manutenção de produtos químicos com código ONU, classe de risco e grupo de compatibilidade;
+- Registro de cargas químicas vinculadas obrigatoriamente a produtos químicos ativos;
+- Controle de ciclo de vida operacional com máquina de estados finitos (State Machine);
+- Validação documental obrigatória (ex.: FISPQ, licenças) para liberação;
+- Controle de acesso baseado em usuários e grupos operacionais;
+- Documentação interativa da API via Swagger UI (`/api/docs`);
+- Suíte completa de testes automatizados unitários e de integração.
 
-## Navegação pela documentação
+---
 
-- `docs/domain.md` — descrição do domínio, entidades, agregados, linguagem ubíqua e regras de negócio.
-- `docs/use-cases.md` — casos de uso planejados, atores, entradas, saídas e regras associadas.
-- `docs/architecture.md` — arquitetura proposta, responsabilidades de camada e caminhos de evolução.
+## 2. Estrutura do Repositório
 
-## Observação
+```text
+Tech-Challenge-FIAP/
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # Pipeline de CI/CD automatizado no GitHub Actions
+├── backend/                     # API RESTful em Node.js / TypeScript
+│   ├── application/use-cases/   # Casos de uso de cargas e produtos
+│   ├── config/                  # Configurações do Sequelize CLI
+│   ├── infrastructure/          # Banco de dados, repositórios, logger e openapi
+│   ├── interfaces/http/         # Rotas Express, controllers e middlewares
+│   ├── migrations/              # Migrações versionadas do banco de dados
+│   ├── src/core/                # Modelos ORM e associações
+│   ├── src/domain/              # Entidades, regras de negócio e state machine
+│   ├── tests/                   # Testes automatizados (Vitest e Supertest)
+│   ├── Dockerfile               # Containerização da aplicação
+│   ├── docker-compose.yml       # Orquestração da API e PostgreSQL
+│   └── README.md                # Documentação técnica aprofundada do backend
+├── documentacao/
+│   ├── Apresentacao_QuimiPort.mp4  # Apresentação do projeto
+│   └── openapi.yaml             # Especificação estática OpenAPI 3.0
+└── README.md                    # Documentação principal da entrega
+```
 
-Nesta fase ainda não há implementação funcional de frontend, backend ou banco de dados. O objetivo é criar a base técnica e a documentação para suportar as próximas etapas do desenvolvimento.
+---
+
+## 3. Tecnologias Utilizadas
+
+- **Backend**: Node.js 22 LTS, TypeScript, Express 5;
+- **Persistência**: PostgreSQL 16, Sequelize ORM, Sequelize CLI;
+- **Validação & Contratos**: Zod, @asteasolutions/zod-to-openapi, Swagger UI;
+- **Logging**: Pino, Pino-HTTP (logs estruturados e rotação em arquivos);
+- **Testes**: Vitest, Supertest (243 testes automatizados);
+- **DevOps**: Docker, Docker Compose, GitHub Actions.
+
+---
+
+## 4. Como Executar o Projeto
+
+### 4.1 Execução com Docker (Recomendado)
+
+Na pasta `backend/`:
+```bash
+# 1. Acessar a pasta do backend
+cd backend
+
+# 2. Configurar o arquivo de variáveis
+cp .env.example .env
+
+# 3. Subir o ambiente completo (API + PostgreSQL)
+docker compose up -d
+```
+A API estará acessível em: `http://localhost:3000`  
+Documentação Swagger UI: `http://localhost:3000/api/docs`
+
+### 4.2 Execução Local (sem Docker)
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm run db:migrate
+npm start
+```
+
+---
+
+## 5. Como Executar os Testes Automatizados
+
+A aplicação conta com mais de 240 testes automatizados cobrindo todas as regras de negócio exigidas no edital.
+
+```bash
+cd backend
+npm test
+```
+
+Para validar a compilação do TypeScript:
+```bash
+npm run build
+```
+
+---
+
+## 6. Documentação da API
+
+- **Swagger UI interativo**: `http://localhost:3000/api/docs`
+- **JSON OpenAPI**: `http://localhost:3000/api/docs.json`
+- **Arquivo de especificação estático**: `documentacao/openapi.yaml`
+
+---
+
+## 7. Decisões Arquiteturais e Máquina de Estados
+
+Consulte o documento detalhado em [backend/README.md](backend/README.md) para:
+- Diagrama e tabela completa das transições permitidas e proibidas da máquina de estados;
+- Modelagem relacional das tabelas, chaves primárias e estrangeiras;
+- Justificativa da escolha do framework Express e do banco relacional PostgreSQL.
+
+---
+
+## 8. Integrantes do Grupo
+
+- Gabriel Santos
+- *(Demais integrantes do grupo conforme entrega acadêmica FIAP)*

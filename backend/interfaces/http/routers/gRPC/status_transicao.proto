@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package quimiport.status;
+
+service StatusService {
+  rpc ValidarTransicao (TransicaoRequest) returns (TransicaoResponse);
+}
+
+message TransicaoRequest {
+  string status_atual = 1;
+  string novo_status = 2;
+}
+
+message TransicaoResponse {
+  bool permitida = 1;
+  string status_resultante = 2;
+  string mensagem = 3;
+}

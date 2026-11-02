@@ -13,6 +13,8 @@ import cargaQuimicaRouter from "./interfaces/http/routers/cargaQuimica/cargaQuim
 import grupoRouter from "./interfaces/http/routers/grupos/grupos";
 import produtoQuimicoRouter from "./interfaces/http/routers/produtoQuimico/produtoQuimicoRoute";
 import routerUser from "./interfaces/http/routers/users/users";
+import graphqlRouter from "./interfaces/http/routers/graphQL/graphqlRoute";
+import grpcRouter from "./interfaces/http/routers/gRPC/grpcRoute";
 
 const app = express();
 
@@ -63,6 +65,9 @@ app.use("/cargas", cargaQuimicaRouter);
 
 app.use("/api/produtos-quimicos", produtoQuimicoRouter);
 app.use("/produtos-quimicos", produtoQuimicoRouter);
+
+app.use("/graphql", graphqlRouter);
+app.use("/grpc", grpcRouter);
 
 app.use(errorHandler);
 
